@@ -1,1043 +1,447 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PANEL BUY BD - Ultimate Gaming Panel Store</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#e8135a',
-                        secondary: '#6c3df4',
-                        darkBg: '#0b0f19',
-                        cardBg: '#131b2e',
-                        borderCol: '#1e293b'
-                    },
-                    keyframes: {
-                        marquee: {
-                            '0%': { transform: 'translateX(100%)' },
-                            '100%': { transform: 'translateX(-100%)' }
-                        }
-                    },
-                    animation: {
-                        marquee: 'marquee 15s linear infinite'
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PANEL BUY BD - Ultimate Gaming Panel Store</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{colors:{primary:'#e8135a',secondary:'#6c3df4',darkBg:'#0b0f19',cardBg:'#131b2e',borderCol:'#1e293b'},keyframes:{marquee:{'0%':{transform:'translateX(100%)'},'100%':{transform:'translateX(-100%)'}}},animation:{marquee:'marquee 15s linear infinite'}}}}
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Inter',sans-serif}
+.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+.inp{width:100%;background:#0f172a;border:1px solid #1e293b;border-radius:12px;padding:8px 12px;font-size:12px;color:#fff;outline:none}
+.inp:focus{border-color:#e8135a}.lbl{display:block;font-size:11px;font-weight:700;color:#cbd5e1;margin-bottom:4px}
+</style>
 </head>
 <body class="bg-darkBg text-slate-100 min-h-screen pb-24 selection:bg-primary selection:text-white">
 
-    <!-- Top Header & Dynamic Branding Logo -->
-    <header class="sticky top-0 z-40 bg-darkBg/90 backdrop-blur-md border-b border-borderCol px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center space-x-2.5">
-            <div id="appLogoContainer" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/30 overflow-hidden">
-                <i class="fa-solid fa-gamepad text-white text-lg"></i>
-            </div>
-            <div>
-                <h1 class="text-base font-extrabold tracking-wide bg-gradient-to-r from-primary to-rose-400 bg-clip-text text-transparent">PANEL BUY BD</h1>
-                <p class="text-[10px] text-slate-400 font-medium">Verified Gaming Store</p>
-            </div>
-        </div>
+<header class="sticky top-0 z-40 bg-darkBg/90 backdrop-blur-md border-b border-borderCol px-4 py-3 flex items-center justify-between">
+  <div class="flex items-center space-x-2.5">
+    <div id="appLogoContainer" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/30 overflow-hidden"><i class="fa-solid fa-gamepad text-white text-lg"></i></div>
+    <div><h1 class="text-base font-extrabold tracking-wide bg-gradient-to-r from-primary to-rose-400 bg-clip-text text-transparent">PANEL BUY BD</h1><p class="text-[10px] text-slate-400 font-medium">Verified Gaming Store</p></div>
+  </div>
+  <div class="flex items-center space-x-3">
+    <div onclick="switchTab('deposit')" class="cursor-pointer bg-cardBg border border-borderCol px-3 py-1.5 rounded-full flex items-center space-x-2 hover:border-primary transition"><i class="fa-solid fa-wallet text-primary text-xs"></i><span class="text-xs font-bold text-slate-200">৳ <span id="userBalance">0.00</span></span></div>
+    <button onclick="toggleAuthModal()" id="authNavBtn" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition"><i class="fa-solid fa-user text-xs"></i></button>
+  </div>
+</header>
 
-        <div class="flex items-center space-x-3">
-            <div id="walletBadge" onclick="switchTab('deposit')" class="cursor-pointer bg-cardBg border border-borderCol px-3 py-1.5 rounded-full flex items-center space-x-2 shadow-inner hover:border-primary transition">
-                <i class="fa-solid fa-wallet text-primary text-xs"></i>
-                <span class="text-xs font-bold text-slate-200">৳ <span id="userBalance">0.00</span></span>
-            </div>
-            <button onclick="toggleAuthModal()" id="authNavBtn" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition">
-                <i class="fa-solid fa-user text-xs"></i>
-            </button>
-        </div>
-    </header>
+<div class="bg-primary/10 border-y border-primary/20 py-2 px-4 flex items-center overflow-hidden relative">
+  <div class="flex items-center space-x-2 mr-3 text-primary shrink-0 z-10 bg-darkBg/90 pr-2"><i class="fa-solid fa-bullhorn animate-bounce text-xs"></i><span class="text-xs font-bold uppercase tracking-wider">Notice:</span></div>
+  <div class="overflow-hidden whitespace-nowrap w-full"><p id="liveNoticeText" class="text-xs text-slate-300 font-medium animate-marquee inline-block">Welcome to Panel Buy BD! Secure automated digital panel store. Add funds instantly and enjoy gaming!</p></div>
+</div>
 
-    <!-- Scrolling Live Notice Bar -->
-    <div class="bg-primary/10 border-y border-primary/20 py-2 px-4 flex items-center overflow-hidden relative">
-        <div class="flex items-center space-x-2 mr-3 text-primary shrink-0 z-10 bg-darkBg/90 pr-2">
-            <i class="fa-solid fa-bullhorn animate-bounce text-xs"></i>
-            <span class="text-xs font-bold uppercase tracking-wider">Notice:</span>
+<main class="max-w-md mx-auto px-4 pt-4">
+
+  <div id="view-home" class="space-y-5">
+    <div class="relative rounded-2xl overflow-hidden border border-borderCol bg-cardBg shadow-xl h-44">
+      <div id="bannerSliderContainer" class="flex transition-transform duration-700 ease-in-out h-full w-full">
+        <div class="min-w-full h-full flex items-center justify-center bg-gradient-to-r from-slate-900 to-indigo-950 p-6">
+          <div class="text-center space-y-2"><span class="bg-primary/20 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full border border-primary/30">⚡ INSTANT DELIVERY</span><h2 class="text-lg font-bold text-white">Top Grade Gaming Panels</h2><p class="text-xs text-slate-400 max-w-[260px] mx-auto">Safe, anti-ban secure root &amp; non-root panels with 24/7 support.</p></div>
         </div>
-        <div class="overflow-hidden whitespace-nowrap w-full">
-            <p id="liveNoticeText" class="text-xs text-slate-300 font-medium animate-marquee inline-block">Welcome to Panel Buy BD! Secure automated digital panel store. Add funds instantly and enjoy gaming!</p>
-        </div>
+      </div>
     </div>
 
-    <!-- Main Dynamic Content Views -->
-    <main class="max-w-md mx-auto px-4 pt-4">
-
-        <!-- TAB 1: HOME VIEW -->
-        <div id="view-home" class="space-y-5">
-            <div class="relative rounded-2xl overflow-hidden border border-borderCol bg-cardBg shadow-xl h-44">
-                <div id="bannerSliderContainer" class="flex transition-transform duration-700 ease-in-out h-full w-full">
-                    <div class="min-w-full h-full relative flex items-center justify-center bg-gradient-to-r from-slate-900 to-indigo-950 p-6">
-                        <div class="z-10 text-center space-y-2">
-                            <span class="bg-primary/20 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full border border-primary/30">⚡ INSTANT DELIVERY</span>
-                            <h2 class="text-lg font-bold text-white">Top Grade Gaming Panels</h2>
-                            <p class="text-xs text-slate-400 max-w-[260px] mx-auto">Safe, anti-ban secure root & non-root panels with 24/7 support.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="switchTab('deposit')" class="p-3 bg-gradient-to-r from-primary/20 to-rose-500/10 border border-primary/30 rounded-xl flex items-center space-x-3 hover:bg-primary/30 transition">
-                    <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white shadow-md">
-                        <i class="fa-solid fa-plus-circle"></i>
-                    </div>
-                    <div class="text-left">
-                        <h4 class="text-xs font-bold text-white">Add Fund</h4>
-                        <p class="text-[10px] text-slate-400">bKash, Nagad, Binance</p>
-                    </div>
-                </button>
-                <button onclick="switchTab('orders')" class="p-3 bg-gradient-to-r from-secondary/20 to-purple-500/10 border border-secondary/30 rounded-xl flex items-center space-x-3 hover:bg-secondary/30 transition">
-                    <div class="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center text-white shadow-md">
-                        <i class="fa-solid fa-receipt"></i>
-                    </div>
-                    <div class="text-left">
-                        <h4 class="text-xs font-bold text-white">My Orders</h4>
-                        <p class="text-[10px] text-slate-400">Check license keys</p>
-                    </div>
-                </button>
-            </div>
-
-            <!-- Categories Section Moved Right Above Products Catalog -->
-            <div class="space-y-2.5">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-bold text-white tracking-wide">Categories</h3>
-                    <span id="categoryCount" class="text-[10px] text-slate-400 font-medium">All items</span>
-                </div>
-                <div id="categoryContainer" class="flex space-x-2 overflow-x-auto no-scrollbar py-1">
-                    <button onclick="filterCategory('ALL')" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-bold bg-primary text-white shadow-md shadow-primary/20 transition">All Items</button>
-                </div>
-            </div>
-
-            <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-bold text-white tracking-wide">Available Products</h3>
-                    <span class="text-[10px] text-primary font-semibold flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> 100% Secure</span>
-                </div>
-                <div id="productCatalogGrid" class="grid grid-cols-2 gap-3.5">
-                    <!-- Products dynamically rendered here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 2: ADD FUND VIEW -->
-        <div id="view-deposit" class="space-y-5 hidden">
-            <div class="bg-cardBg border border-borderCol rounded-2xl p-4 shadow-xl space-y-4">
-                <div>
-                    <h3 class="text-sm font-bold text-white">Deposit Funds</h3>
-                    <p class="text-xs text-slate-400">Add money to your wallet to purchase panels instantly.</p>
-                </div>
-
-                <div class="bg-slate-900/60 border border-slate-800 p-3 rounded-xl space-y-2">
-                    <p class="text-xs font-semibold text-primary" id="minDepositNotice">Minimum Deposit: ৳ 50</p>
-                    <div id="adminPaymentNumbers" class="space-y-1 text-xs text-slate-300"></div>
-                    <p class="text-[11px] text-slate-400 italic mt-2" id="paymentInstructionsText">Send money to above numbers using Send Money option, then submit transaction details below.</p>
-                </div>
-
-                <form id="depositForm" onsubmit="submitDeposit(event)" class="space-y-3">
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-300 mb-1">Select Gateway</label>
-                        <select id="depositGateway" required class="w-full bg-slate-900 border border-borderCol rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary">
-                            <option value="bKash">bKash Manual</option>
-                            <option value="Nagad">Nagad Manual</option>
-                            <option value="Binance">Binance Pay ID / USDT</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-300 mb-1">Amount (BDT)</label>
-                        <input type="number" id="depositAmount" placeholder="e.g. 500" required class="w-full bg-slate-900 border border-borderCol rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-300 mb-1">Sender Number / Account</label>
-                        <input type="text" id="depositSender" placeholder="01XXXXXXXXX" required class="w-full bg-slate-900 border border-borderCol rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-300 mb-1">Transaction ID (TrxID)</label>
-                        <input type="text" id="depositTrxId" placeholder="e.g. 9N8H7G6F5D" required class="w-full bg-slate-900 border border-borderCol rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary uppercase">
-                    </div>
-                    <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-primary to-rose-600 rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 hover:opacity-95 transition">Submit Deposit Request</button>
-                </form>
-            </div>
-
-            <div class="space-y-3">
-                <h4 class="text-xs font-bold text-slate-300 tracking-wider uppercase">My Deposit Logs</h4>
-                <div id="userDepositHistory" class="space-y-2"></div>
-            </div>
-        </div>
-
-        <!-- TAB 3: MY ORDERS VIEW -->
-        <div id="view-orders" class="space-y-4 hidden">
-            <div class="flex items-center justify-between">
-                <h3 class="text-sm font-bold text-white">Order & License History</h3>
-                <button onclick="loadUserOrdersAndStats()" class="text-xs text-primary font-semibold flex items-center gap-1"><i class="fa-solid fa-rotate"></i> Refresh</button>
-            </div>
-            <div id="userOrdersList" class="space-y-3"></div>
-        </div>
-
-        <!-- TAB 4: MY KEYS VIEW -->
-        <div id="view-keys" class="space-y-4 hidden">
-            <h3 class="text-sm font-bold text-white">Delivered License Keys</h3>
-            <div id="userKeysList" class="space-y-3"></div>
-        </div>
-
-        <!-- TAB 5: ACCOUNT VIEW -->
-        <div id="view-account" class="space-y-4 hidden">
-            <div class="bg-cardBg border border-borderCol rounded-2xl p-5 text-center space-y-3 shadow-xl">
-                <div class="w-16 h-16 bg-primary/20 border border-primary/40 rounded-full flex items-center justify-center mx-auto text-primary text-2xl font-bold">
-                    <span id="accountInitial">U</span>
-                </div>
-                <div>
-                    <h3 id="accountEmail" class="text-sm font-bold text-white">guest@panelbuybd.com</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">UID: <span id="accountUid" class="font-mono text-[10px]">Not logged in</span></p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-cardBg border border-borderCol p-3.5 rounded-xl space-y-1 text-center shadow-md">
-                    <p class="text-[10px] text-slate-400 font-medium">AVAILABLE BALANCE</p>
-                    <p class="text-sm font-extrabold text-primary">৳ <span id="accountBalance">0.00</span></p>
-                </div>
-                <div class="bg-cardBg border border-borderCol p-3.5 rounded-xl space-y-1 text-center shadow-md">
-                    <p class="text-[10px] text-slate-400 font-medium">TOTAL ORDER</p>
-                    <p id="accountTotalOrders" class="text-sm font-extrabold text-white">0</p>
-                </div>
-                <div class="bg-cardBg border border-borderCol p-3.5 rounded-xl space-y-1 text-center shadow-md">
-                    <p class="text-[10px] text-slate-400 font-medium">TOTAL SPENT</p>
-                    <p class="text-sm font-extrabold text-emerald-400">৳ <span id="accountTotalSpent">0.00</span></p>
-                </div>
-                <div class="bg-cardBg border border-borderCol p-3.5 rounded-xl space-y-1 text-center shadow-md">
-                    <p class="text-[10px] text-slate-400 font-medium">SUPPORT PIN</p>
-                    <p id="accountSupportPin" class="text-sm font-extrabold text-amber-400 font-mono">----</p>
-                </div>
-            </div>
-
-            <a id="telegramSupportBtn" href="https://t.me/" target="_blank" class="w-full bg-cyan-600/20 border border-cyan-500/30 p-3 rounded-2xl flex items-center justify-between hover:bg-cyan-600/30 transition">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-cyan-500 flex items-center justify-center text-white text-lg">
-                        <i class="fa-brands fa-telegram"></i>
-                    </div>
-                    <div class="text-left">
-                        <h4 class="text-xs font-bold text-white">Official Telegram Support</h4>
-                        <p class="text-[10px] text-cyan-300">Join our community & get help</p>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-right text-xs text-cyan-400"></i>
-            </a>
-
-            <button id="authActionButton" onclick="handleAuthAction()" class="w-full py-3 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-rose-400 hover:bg-slate-700/80 transition">
-                Login / Register
-            </button>
-        </div>
-
-    </main>
-
-    <!-- Fixed Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-darkBg/95 backdrop-blur-lg border-t border-borderCol px-4 py-2.5 z-40 flex justify-around items-center">
-        <button onclick="switchTab('home')" class="nav-item flex flex-col items-center space-y-1 text-primary" data-tab="home">
-            <i class="fa-solid fa-house text-base"></i>
-            <span class="text-[10px] font-medium">Home</span>
-        </button>
-        <button onclick="switchTab('deposit')" class="nav-item flex flex-col items-center space-y-1 text-slate-400 hover:text-primary transition" data-tab="deposit">
-            <i class="fa-solid fa-wallet text-base"></i>
-            <span class="text-[10px] font-medium">Add Fund</span>
-        </button>
-        <button onclick="switchTab('orders')" class="nav-item flex flex-col items-center space-y-1 text-slate-400 hover:text-primary transition" data-tab="orders">
-            <i class="fa-solid fa-receipt text-base"></i>
-            <span class="text-[10px] font-medium">Orders</span>
-        </button>
-        <button onclick="switchTab('keys')" class="nav-item flex flex-col items-center space-y-1 text-slate-400 hover:text-primary transition" data-tab="keys">
-            <i class="fa-solid fa-key text-base"></i>
-            <span class="text-[10px] font-medium">My Keys</span>
-        </button>
-        <button onclick="switchTab('account')" class="nav-item flex flex-col items-center space-y-1 text-slate-400 hover:text-primary transition" data-tab="account">
-            <i class="fa-solid fa-user-gear text-base"></i>
-            <span class="text-[10px] font-medium">Account</span>
-        </button>
-    </nav>
-
-    <!-- PRODUCT DETAILS & PURCHASE MODAL -->
-    <div id="productModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-cardBg border border-borderCol w-full max-w-md rounded-t-3xl sm:rounded-2xl max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-borderCol pb-3">
-                <h3 id="modalProductName" class="text-base font-bold text-white">Product Name</h3>
-                <button onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark text-xs"></i>
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <img id="modalProductImage" src="https://placehold.co/400x200/131b2e/e8135a?text=Panel" alt="Product" class="w-full h-36 object-cover rounded-xl border border-borderCol">
-
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-300">Select Package Duration</label>
-                    <div id="modalPackagesList" class="grid grid-cols-1 gap-2"></div>
-                </div>
-
-                <div class="flex space-x-2 pt-1">
-                    <a id="modalSetupLink" href="#" target="_blank" class="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold text-center border border-slate-700 transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-book-open text-primary"></i> Setup Guide
-                    </a>
-                    <a id="modalVideoLink" href="#" target="_blank" class="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold text-center border border-slate-700 transition flex items-center justify-center gap-1.5">
-                        <i class="fa-brands fa-youtube text-rose-500"></i> Video Tutorial
-                    </a>
-                </div>
-
-                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-1">
-                    <h5 class="text-[11px] font-bold text-rose-400 flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Rules & Conditions</h5>
-                    <p id="modalRulesText" class="text-[11px] text-slate-400">Make sure your device is supported before purchasing.</p>
-                </div>
-
-                <!-- Product Maintenance Warning Banner inside modal if active -->
-                <div id="modalMaintenanceAlert" class="hidden bg-amber-500/20 border border-amber-500/30 p-3 rounded-xl text-center space-y-1">
-                    <p class="text-xs font-bold text-amber-400"><i class="fa-solid fa-triangle-exclamation"></i> প্যানেল সাময়িকভাবে মেইনটেনেন্স!</p>
-                    <p class="text-[10px] text-slate-300">আমাদের অবহিত করা হয়েছে যে এই প্যানেলটি বর্তমানে মেইনটেনেন্সে রয়েছে।</p>
-                </div>
-
-                <button onclick="confirmPurchase()" id="confirmBuyBtn" class="w-full py-3 bg-gradient-to-r from-primary to-rose-600 rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 hover:opacity-95 transition">
-                    Purchase Now (৳ <span id="modalSelectedPrice">0</span>)
-                </button>
-            </div>
-        </div>
+    <div class="grid grid-cols-2 gap-3">
+      <button onclick="switchTab('deposit')" class="p-3 bg-gradient-to-r from-primary/20 to-rose-500/10 border border-primary/30 rounded-xl flex items-center space-x-3 hover:bg-primary/30 transition"><div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white shadow-md"><i class="fa-solid fa-plus-circle"></i></div><div class="text-left"><h4 class="text-xs font-bold text-white">Add Fund</h4><p class="text-[10px] text-slate-400">bKash, Nagad, Binance</p></div></button>
+      <button onclick="switchTab('orders')" class="p-3 bg-gradient-to-r from-secondary/20 to-purple-500/10 border border-secondary/30 rounded-xl flex items-center space-x-3 hover:bg-secondary/30 transition"><div class="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center text-white shadow-md"><i class="fa-solid fa-receipt"></i></div><div class="text-left"><h4 class="text-xs font-bold text-white">My Orders</h4><p class="text-[10px] text-slate-400">Check license keys</p></div></button>
     </div>
 
-    <!-- AUTH MODAL -->
-    <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cardBg border border-borderCol w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-borderCol pb-3">
-                <h3 id="authModalTitle" class="text-sm font-bold text-white">Login to Account</h3>
-                <button onclick="toggleAuthModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark text-xs"></i>
-                </button>
-            </div>
-            <form onsubmit="handleAuthSubmit(event)" class="space-y-3">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-300 mb-1">Email Address</label>
-                    <input type="email" id="authEmail" required class="w-full bg-slate-900 border border-borderCol rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary" placeholder="user@gmail.com">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-300 mb-1">Password</label>
-                    <div class="relative">
-                        <input type="password" id="authPassword" required class="w-full bg-slate-900 border border-borderCol rounded-xl px-3 py-2 pr-9 text-xs text-white focus:outline-none focus:border-primary" placeholder="••••••••">
-                        <button type="button" onclick="togglePasswordVisibility('authPassword', 'eyeIcon1')" class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs">
-                            <i id="eyeIcon1" class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <div id="confirmPasswordGroup" class="hidden">
-                    <label class="block text-[11px] font-bold text-slate-300 mb-1">Confirm Password</label>
-                    <div class="relative">
-                        <input type="password" id="authConfirmPassword" class="w-full bg-slate-900 border border-borderCol rounded-xl px-3 py-2 pr-9 text-xs text-white focus:outline-none focus:border-primary" placeholder="••••••••">
-                        <button type="button" onclick="togglePasswordVisibility('authConfirmPassword', 'eyeIcon2')" class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs">
-                            <i id="eyeIcon2" class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between text-[11px]">
-                    <span id="authToggleText" class="text-slate-400">Don't have an account?</span>
-                    <button type="button" onclick="toggleAuthMode()" class="text-primary font-bold hover:underline">Register</button>
-                </div>
-                <div class="text-right">
-                    <button type="button" onclick="handleForgotPassword()" class="text-[11px] text-cyan-400 hover:underline">Forgot Password?</button>
-                </div>
-                <button type="submit" id="authSubmitBtn" class="w-full py-2.5 bg-primary rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 transition">Login</button>
-            </form>
-        </div>
+    <div class="space-y-2.5">
+      <div class="flex items-center justify-between"><h3 class="text-sm font-bold text-white tracking-wide">Categories</h3><span id="categoryCount" class="text-[10px] text-slate-400 font-medium">All items</span></div>
+      <div id="categoryContainer" class="flex flex-nowrap space-x-2 overflow-x-auto no-scrollbar py-1"></div>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toastNotification" class="fixed top-16 right-4 z-50 transform translate-x-full transition-transform duration-300 bg-slate-900 border border-borderCol px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3">
-        <div id="toastIcon" class="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs">
-            <i class="fa-solid fa-check"></i>
-        </div>
-        <div>
-            <h5 id="toastTitle" class="text-xs font-bold text-white">Success</h5>
-            <p id="toastMessage" class="text-[10px] text-slate-400">Action completed successfully.</p>
-        </div>
+    <div class="space-y-3">
+      <div class="flex items-center justify-between"><h3 class="text-sm font-bold text-white tracking-wide">Available Products</h3><span class="text-[10px] text-primary font-semibold flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> 100% Secure</span></div>
+      <div id="productCatalogGrid" class="grid grid-cols-2 gap-3.5"></div>
     </div>
-
-    <!-- Firebase Compat SDK Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDDsSGZd0wFp6FuJid2iWPRUNKvQb90zoc",
-            authDomain: "panel-buy-bd.firebaseapp.com",
-            projectId: "panel-buy-bd",
-            storageBucket: "panel-buy-bd.firebasestorage.app",
-            messagingSenderId: "864265229911",
-            appId: "1:864265229911:web:7a55e73fdcffe5b5b8b512"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const appId = "panel-buy-bd";
-
-        let currentUser = null;
-        let userData = { balance: 0, supportPin: '----' };
-        let allProducts = [];
-        let allCategories = [];
-        let selectedCategoryFilter = 'ALL';
-        let currentSelectedProduct = null;
-        let selectedPackageIndex = 0;
-        let isRegisterMode = false;
-        let appSettings = {};
-        let bannerTimer = null;
-        let currentSlide = 0;
-
-        auth.onAuthStateChanged(async (user) => {
-            currentUser = user;
-            if (user) {
-                document.getElementById('authNavBtn').innerHTML = `<i class="fa-solid fa-user-check text-xs text-primary"></i>`;
-                document.getElementById('authActionButton').innerText = "Logout";
-                document.getElementById('accountEmail').innerText = user.email;
-                document.getElementById('accountUid').innerText = user.uid;
-                document.getElementById('accountInitial').innerText = user.email.charAt(0).toUpperCase();
-
-                const userDocRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('users').doc(user.uid);
-                userDocRef.onSnapshot((docSnap) => {
-                    if (docSnap.exists) {
-                        userData = docSnap.data();
-                        if (userData.isBlocked) {
-                            alert("Your account has been blocked by admin.");
-                            auth.signOut();
-                            return;
-                        }
-                        if (!userData.supportPin) {
-                            const generatedPin = Math.floor(1000 + Math.random() * 9000).toString();
-                            userDocRef.update({ supportPin: generatedPin });
-                            userData.supportPin = generatedPin;
-                        }
-                    } else {
-                        const generatedPin = Math.floor(1000 + Math.random() * 9000).toString();
-                        userData = { email: user.email, balance: 0, supportPin: generatedPin, isBlocked: false, createdAt: new Date().toISOString() };
-                        userDocRef.set(userData);
-                    }
-                    document.getElementById('userBalance').innerText = Number(userData.balance || 0).toFixed(2);
-                    document.getElementById('accountBalance').innerText = Number(userData.balance || 0).toFixed(2);
-                    document.getElementById('accountSupportPin').innerText = userData.supportPin || '----';
-                }, (err) => console.error("User stream error:", err));
-
-                loadUserOrdersAndStats();
-                loadUserDeposits();
-            } else {
-                document.getElementById('authNavBtn').innerHTML = `<i class="fa-solid fa-user text-xs"></i>`;
-                document.getElementById('authActionButton').innerText = "Login / Register";
-                document.getElementById('accountEmail').innerText = "guest@panelbuybd.com";
-                document.getElementById('accountUid').innerText = "Not logged in";
-                document.getElementById('accountInitial').innerText = "G";
-                document.getElementById('userBalance').innerText = "0.00";
-                document.getElementById('accountBalance').innerText = "0.00";
-                document.getElementById('accountTotalOrders').innerText = "0";
-                document.getElementById('accountTotalSpent').innerText = "0.00";
-                document.getElementById('accountSupportPin').innerText = "----";
-                userData = { balance: 0 };
-            }
-        });
-
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            auth.signInWithCustomToken(__initial_auth_token).catch(() => auth.signInAnonymously());
-        } else {
-            auth.signInAnonymously().catch(err => console.log("Anon signin notice:", err));
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initSettingsListener();
-            initCategoriesListener();
-            initProductsListener();
-        });
-
-        function initSettingsListener() {
-            db.collection('artifacts').doc(appId).collection('public').doc('data').collection('settings').doc('main')
-              .onSnapshot((docSnap) => {
-                  if (docSnap.exists) {
-                      appSettings = docSnap.data();
-                      if (appSettings.appLogo) {
-                          document.getElementById('appLogoContainer').innerHTML = `<img src="${appSettings.appLogo}" class="w-full h-full object-cover">`;
-                      }
-                      if (appSettings.liveNotice) {
-                          document.getElementById('liveNoticeText').innerText = appSettings.liveNotice;
-                      }
-                      if (appSettings.telegramSupport) {
-                          document.getElementById('telegramSupportBtn').href = appSettings.telegramSupport;
-                      }
-                      if (appSettings.minDeposit) {
-                          document.getElementById('minDepositNotice').innerText = `Minimum Deposit: ৳ ${appSettings.minDeposit}`;
-                      }
-                      if (appSettings.paymentInstructions) {
-                          document.getElementById('paymentInstructionsText').innerText = appSettings.paymentInstructions;
-                      }
-                      let numbersHtml = '';
-                      if (appSettings.bkashNumber) numbersHtml += `<p><b>bKash (Send Money):</b> ${appSettings.bkashNumber}</p>`;
-                      if (appSettings.nagadNumber) numbersHtml += `<p><b>Nagad (Send Money):</b> ${appSettings.nagadNumber}</p>`;
-                      if (appSettings.binanceId) numbersHtml += `<p><b>Binance Pay ID/Address:</b> ${appSettings.binanceId}</p>`;
-                      document.getElementById('adminPaymentNumbers').innerHTML = numbersHtml || '<p class="text-slate-500">Contact admin for deposit numbers.</p>';
-
-                      if (appSettings.banners && appSettings.banners.trim() !== '') {
-                          const bannerLines = appSettings.banners.split('\n').filter(b => b.trim() !== '');
-                          let bannerHtml = '';
-                          bannerLines.forEach(line => {
-                              const parts = line.split('|');
-                              const imgUrl = parts[0].trim();
-                              const redirectUrl = parts[1] ? parts[1].trim() : '#';
-                              bannerHtml += `
-                                  <div class="min-w-full h-full relative cursor-pointer" onclick="if('${redirectUrl}' !== '#') window.open('${redirectUrl}', '_blank')">
-                                      <img src="${imgUrl}" alt="Banner" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x200/131b2e/e8135a?text=Panel+Buy+BD'">
-                                  </div>
-                              `;
-                          });
-                          document.getElementById('bannerSliderContainer').innerHTML = bannerHtml;
-                          startAutoBannerSlider(bannerLines.length);
-                      }
-                  }
-              }, err => console.log("Settings listener err:", err));
-        }
-
-        function startAutoBannerSlider(totalSlides) {
-            if (bannerTimer) clearInterval(bannerTimer);
-            if (totalSlides <= 1) return;
-            currentSlide = 0;
-            bannerTimer = setInterval(() => {
-                currentSlide = (currentSlide + 1) % totalSlides;
-                const container = document.getElementById('bannerSliderContainer');
-                if (container) {
-                    container.style.transform = `translateX(-${currentSlide * 100}%)`;
-                }
-            }, 3500);
-        }
-
-        function initCategoriesListener() {
-            db.collection('artifacts').doc(appId).collection('public').doc('data').collection('categories')
-              .onSnapshot((snapshot) => {
-                  allCategories = [];
-                  snapshot.forEach(doc => {
-                      allCategories.push({ id: doc.id, ...doc.data() });
-                  });
-                  allCategories.sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
-                  renderCategories();
-              }, err => console.log("Categories listener err:", err));
-        }
-
-        function initProductsListener() {
-            db.collection('artifacts').doc(appId).collection('public').doc('data').collection('products')
-              .onSnapshot((snapshot) => {
-                  allProducts = [];
-                  snapshot.forEach(doc => {
-                      const prod = { id: doc.id, ...doc.data() };
-                      if (prod.active !== false) {
-                          allProducts.push(prod);
-                      }
-                  });
-                  renderProducts();
-              }, err => console.log("Products listener err:", err));
-        }
-
-        function renderCategories() {
-            let html = `<button onclick="filterCategory('ALL')" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-bold ${selectedCategoryFilter === 'ALL' ? 'bg-primary text-white shadow-md shadow-primary/20' : 'bg-cardBg text-slate-300 border border-borderCol'} transition">All Items</button>`;
-            allCategories.forEach(cat => {
-                const isActive = selectedCategoryFilter === cat.name;
-                html += `<button onclick="filterCategory('${cat.name}')" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-bold ${isActive ? 'bg-primary text-white shadow-md shadow-primary/20' : 'bg-cardBg text-slate-300 border border-borderCol'} transition">${cat.name}</button>`;
-            });
-            document.getElementById('categoryContainer').innerHTML = html;
-        }
-
-        function filterCategory(catName) {
-            selectedCategoryFilter = catName;
-            renderCategories();
-            renderProducts();
-        }
-
-        function renderProducts() {
-            let filtered = allProducts;
-            if (selectedCategoryFilter !== 'ALL') {
-                filtered = allProducts.filter(p => p.category === selectedCategoryFilter);
-            }
-
-            document.getElementById('categoryCount').innerText = `${filtered.length} items`;
-
-            if (filtered.length === 0) {
-                document.getElementById('productCatalogGrid').innerHTML = `<div class="col-span-2 text-center py-10 text-slate-500 text-xs">No products found in this category.</div>`;
-                return;
-            }
-
-            let html = '';
-            filtered.forEach(p => {
-                let minPrice = 0;
-                let packagesArr = parsePackages(p.packages);
-                if (packagesArr.length > 0) {
-                    minPrice = packagesArr[0].price;
-                }
-
-                // Maintenance badge placed strictly at top-left, and category badge at top-right
-                let maintenanceBadge = p.maintenance === true 
-                    ? `<span class="absolute top-2 left-2 bg-amber-500 text-slate-950 text-[9px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md z-10"><i class="fa-solid fa-triangle-exclamation"></i> MAINTENANCE</span>` 
-                    : '';
-
-                html += `
-                    <div onclick="openProductModal('${p.id}')" class="bg-cardBg border border-borderCol rounded-2xl overflow-hidden shadow-lg hover:border-primary/50 transition cursor-pointer flex flex-col justify-between">
-                        <div>
-                            <div class="h-28 relative overflow-hidden bg-slate-900">
-                                <img src="${p.image || 'https://placehold.co/300x200/131b2e/e8135a?text=Panel'}" alt="${p.name}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/131b2e/e8135a?text=Panel'">
-                                ${maintenanceBadge}
-                                <span class="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-[10px] font-bold text-slate-200 px-2 py-0.5 rounded-full border border-white/10 z-10">${p.category || 'PANEL'}</span>
-                            </div>
-                            <div class="p-3 space-y-1">
-                                <h4 class="text-xs font-bold text-white line-clamp-1">${p.name}</h4>
-                                <p class="text-[10px] text-slate-400 line-clamp-1">${p.rules || 'Secure anti-ban panel'}</p>
-                            </div>
-                        </div>
-                        <div class="p-3 pt-0 flex items-center justify-between border-t border-borderCol/50 mt-2">
-                            <div>
-                                <p class="text-[9px] text-slate-400">Starts from</p>
-                                <p class="text-xs font-extrabold text-primary">৳ ${minPrice}</p>
-                            </div>
-                            <button class="w-7 h-7 rounded-lg bg-primary/20 text-primary flex items-center justify-center text-xs hover:bg-primary hover:text-white transition">
-                                <i class="fa-solid fa-cart-shopping"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-            document.getElementById('productCatalogGrid').innerHTML = html;
-        }
-
-        function parsePackages(pkgStr) {
-            if (!pkgStr) return [];
-            let lines = pkgStr.split('\n');
-            let pkgs = [];
-            lines.forEach(line => {
-                let parts = line.split('|');
-                if (parts.length >= 2) {
-                    pkgs.push({
-                        name: parts[0].trim(),
-                        price: Number(parts[1].trim()) || 0,
-                        stock: parts[2] ? parts[2].trim() : 'Available'
-                    });
-                }
-            });
-            return pkgs;
-        }
-
-        function openProductModal(productId) {
-            const product = allProducts.find(p => p.id === productId);
-            if (!product) return;
-            currentSelectedProduct = product;
-            selectedPackageIndex = 0;
-
-            document.getElementById('modalProductName').innerText = product.name;
-            document.getElementById('modalProductImage').src = product.image || 'https://placehold.co/400x200/131b2e/e8135a?text=Panel';
-            document.getElementById('modalSetupLink').href = product.setupLink || '#';
-            document.getElementById('modalVideoLink').href = product.videoLink || '#';
-            document.getElementById('modalRulesText').innerText = product.rules || 'No specific rules.';
-
-            const maintAlert = document.getElementById('modalMaintenanceAlert');
-            const buyBtn = document.getElementById('confirmBuyBtn');
-            if (product.maintenance === true) {
-                maintAlert.classList.remove('hidden');
-                buyBtn.innerText = "Panel Under Maintenance";
-                buyBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            } else {
-                maintAlert.classList.add('hidden');
-                buyBtn.innerText = `Purchase Now (৳ <span id="modalSelectedPrice">0</span>)`;
-                buyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            }
-
-            renderModalPackages();
-            document.getElementById('productModal').classList.remove('hidden');
-        }
-
-        function renderModalPackages() {
-            if (!currentSelectedProduct) return;
-            let pkgs = parsePackages(currentSelectedProduct.packages);
-            let html = '';
-            pkgs.forEach((pkg, index) => {
-                const isSelected = selectedPackageIndex === index;
-                html += `
-                    <div onclick="selectPackage(${index})" class="p-3 rounded-xl border ${isSelected ? 'border-primary bg-primary/10' : 'border-borderCol bg-slate-900'} flex items-center justify-between cursor-pointer transition">
-                        <div>
-                            <h5 class="text-xs font-bold text-white">${pkg.name}</h5>
-                            <p class="text-[10px] text-slate-400">Stock: <span class="text-emerald-400">${pkg.stock}</span></p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs font-extrabold text-primary">৳ ${pkg.price}</span>
-                        </div>
-                    </div>
-                `;
-            });
-            document.getElementById('modalPackagesList').innerHTML = html;
-            if (pkgs.length > 0) {
-                document.getElementById('modalSelectedPrice').innerText = pkgs[selectedPackageIndex].price;
-            }
-        }
-
-        function selectPackage(index) {
-            selectedPackageIndex = index;
-            renderModalPackages();
-        }
-
-        function closeProductModal() {
-            document.getElementById('productModal').classList.add('hidden');
-            currentSelectedProduct = null;
-        }
-
-        async function confirmPurchase() {
-            if (!currentUser) {
-                showToast("Please login first to purchase panels.", "error");
-                toggleAuthModal();
-                return;
-            }
-
-            if (!currentSelectedProduct) return;
-
-            if (currentSelectedProduct.maintenance === true) {
-                showToast("This panel is currently under maintenance. Cannot purchase.", "error");
-                return;
-            }
-
-            let pkgs = parsePackages(currentSelectedProduct.packages);
-            if (pkgs.length === 0) {
-                showToast("No active packages found.", "error");
-                return;
-            }
-
-            let selectedPkg = pkgs[selectedPackageIndex];
-            let price = selectedPkg.price;
-
-            if (Number(userData.balance || 0) < price) {
-                showToast("Insufficient wallet balance! Please Add Fund.", "error");
-                switchTab('deposit');
-                closeProductModal();
-                return;
-            }
-
-            try {
-                const newBalance = Number(userData.balance) - price;
-                await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('users').doc(currentUser.uid).update({
-                    balance: newBalance
-                });
-
-                const orderData = {
-                    userId: currentUser.uid,
-                    userEmail: currentUser.email,
-                    productName: currentSelectedProduct.name,
-                    packageName: selectedPkg.name,
-                    price: price,
-                    status: 'pending',
-                    licenseKey: '',
-                    createdAt: new Date().toISOString()
-                };
-
-                await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('orders').add(orderData);
-
-                showToast("Order placed successfully! Check 'My Orders'.", "success");
-                closeProductModal();
-                switchTab('orders');
-            } catch (err) {
-                console.error("Purchase error:", err);
-                showToast("Purchase failed. Try again.", "error");
-            }
-        }
-
-        async function submitDeposit(event) {
-            event.preventDefault();
-            if (!currentUser) {
-                showToast("Please login to submit deposit.", "error");
-                toggleAuthModal();
-                return;
-            }
-
-            const gateway = document.getElementById('depositGateway').value;
-            const amount = Number(document.getElementById('depositAmount').value);
-            const sender = document.getElementById('depositSender').value;
-            const trxId = document.getElementById('depositTrxId').value.trim();
-
-            const minDep = Number(appSettings.minDeposit || 50);
-            if (amount < minDep) {
-                showToast(`Minimum deposit amount is ৳ ${minDep}`, "error");
-                return;
-            }
-
-            try {
-                const depositData = {
-                    userId: currentUser.uid,
-                    userEmail: currentUser.email,
-                    gateway: gateway,
-                    amount: amount,
-                    sender: sender,
-                    trxId: trxId,
-                    status: 'pending',
-                    createdAt: new Date().toISOString()
-                };
-
-                await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('deposits').add(depositData);
-
-                showToast("Deposit request submitted successfully! Awaiting admin approval.", "success");
-                document.getElementById('depositForm').reset();
-                loadUserDeposits();
-            } catch (err) {
-                console.error("Deposit submission error:", err);
-                showToast("Failed to submit deposit.", "error");
-            }
-        }
-
-        function loadUserOrdersAndStats() {
-            if (!currentUser) return;
-            db.collection('artifacts').doc(appId).collection('public').doc('data').collection('orders')
-              .where('userId', '==', currentUser.uid)
-              .onSnapshot((snapshot) => {
-                  let orders = [];
-                  snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
-                  orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-                  let totalSpent = 0;
-                  orders.forEach(o => {
-                      if (o.status === 'completed') totalSpent += Number(o.price || 0);
-                  });
-
-                  document.getElementById('accountTotalOrders').innerText = orders.length;
-                  document.getElementById('accountTotalSpent').innerText = totalSpent.toFixed(2);
-
-                  let ordersHtml = '';
-                  let keysHtml = '';
-
-                  if (orders.length === 0) {
-                      document.getElementById('userOrdersList').innerHTML = `<p class="text-center text-slate-500 text-xs py-6">No orders placed yet.</p>`;
-                      document.getElementById('userKeysList').innerHTML = `<p class="text-center text-slate-500 text-xs py-6">No license keys delivered yet.</p>`;
-                      return;
-                  }
-
-                  orders.forEach(o => {
-                      let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">Pending</span>`;
-                      if (o.status === 'completed') statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Completed</span>`;
-                      if (o.status === 'rejected') statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">Rejected</span>`;
-
-                      ordersHtml += `
-                          <div class="bg-cardBg border border-borderCol rounded-xl p-3.5 space-y-2 shadow-md">
-                              <div class="flex items-center justify-between">
-                                  <h5 class="text-xs font-bold text-white">${o.productName}</h5>
-                                  ${statusBadge}
-                              </div>
-                              <div class="flex items-center justify-between text-[11px] text-slate-400">
-                                  <span>Package: <b class="text-slate-200">${o.packageName}</b></span>
-                                  <span class="text-primary font-bold">৳ ${o.price}</span>
-                              </div>
-                              ${o.licenseKey ? `<div class="bg-slate-900 border border-slate-800 p-2 rounded-lg flex items-center justify-between"><code class="text-xs font-mono text-emerald-400">${o.licenseKey}</code><button onclick="copyKey('${o.licenseKey}')" class="text-xs text-slate-400 hover:text-white"><i class="fa-solid fa-copy"></i></button></div>` : ''}
-                          </div>
-                      `;
-
-                      if (o.status === 'completed' && o.licenseKey) {
-                          keysHtml += `
-                              <div class="bg-cardBg border border-borderCol rounded-xl p-3.5 space-y-2 shadow-md">
-                                  <div class="flex items-center justify-between">
-                                      <h5 class="text-xs font-bold text-white">${o.productName} (${o.packageName})</h5>
-                                      <span class="text-[10px] text-slate-400">${new Date(o.createdAt).toLocaleDateString()}</span>
-                                  </div>
-                                  <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-lg flex items-center justify-between">
-                                      <code class="text-xs font-mono text-emerald-400 font-bold">${o.licenseKey}</code>
-                                      <button onclick="copyKey('${o.licenseKey}')" class="px-2.5 py-1 bg-primary/20 text-primary text-xs rounded-lg hover:bg-primary hover:text-white transition"><i class="fa-solid fa-copy"></i> Copy</button>
-                                  </div>
-                              </div>
-                          `;
-                      }
-                  });
-
-                  document.getElementById('userOrdersList').innerHTML = ordersHtml;
-                  document.getElementById('userKeysList').innerHTML = keysHtml || `<p class="text-center text-slate-500 text-xs py-6">No license keys available yet.</p>`;
-              }, err => console.log("Orders listener err:", err));
-        }
-
-        function loadUserDeposits() {
-            if (!currentUser) return;
-            db.collection('artifacts').doc(appId).collection('public').doc('data').collection('deposits')
-              .where('userId', '==', currentUser.uid)
-              .onSnapshot((snapshot) => {
-                  let deposits = [];
-                  snapshot.forEach(doc => deposits.push({ id: doc.id, ...doc.data() }));
-                  deposits.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-                  let html = '';
-                  if (deposits.length === 0) {
-                      document.getElementById('userDepositHistory').innerHTML = `<p class="text-center text-slate-500 text-xs py-4">No deposit logs found.</p>`;
-                      return;
-                  }
-
-                  deposits.forEach(d => {
-                      let statusColor = 'text-amber-400 bg-amber-500/20 border-amber-500/30';
-                      if (d.status === 'approved') statusColor = 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30';
-                      if (d.status === 'rejected') statusColor = 'text-rose-400 bg-rose-500/20 border-rose-500/30';
-
-                      html += `
-                          <div class="bg-cardBg border border-borderCol rounded-xl p-3 flex items-center justify-between">
-                              <div>
-                                  <div class="flex items-center space-x-2">
-                                      <span class="text-xs font-bold text-white">${d.gateway}</span>
-                                      <span class="px-2 py-0.5 rounded text-[9px] font-bold border ${statusColor}">${d.status.toUpperCase()}</span>
-                                  </div>
-                                  <p class="text-[10px] text-slate-400 mt-0.5">TrxID: <b class="text-slate-300 font-mono">${d.trxId}</b></p>
-                              </div>
-                              <div class="text-right">
-                                  <span class="text-xs font-extrabold text-primary">৳ ${d.amount}</span>
-                                  <p class="text-[9px] text-slate-500">${new Date(d.createdAt).toLocaleDateString()}</p>
-                              </div>
-                          </div>
-                      `;
-                  });
-                  document.getElementById('userDepositHistory').innerHTML = html;
-              }, err => console.log("Deposits listener err:", err));
-        }
-
-        function copyKey(key) {
-            const textArea = document.createElement("textarea");
-            textArea.value = key;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                showToast("License key copied to clipboard!", "success");
-            } catch (err) {
-                showToast("Failed to copy key.", "error");
-            }
-            document.body.removeChild(textArea);
-        }
-
-        function switchTab(tabName) {
-            const tabs = ['home', 'deposit', 'orders', 'keys', 'account'];
-            tabs.forEach(t => {
-                const el = document.getElementById(`view-${t}`);
-                if (el) el.classList.add('hidden');
-            });
-
-            const targetView = document.getElementById(`view-${tabName}`);
-            if (targetView) targetView.classList.remove('hidden');
-
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('text-primary');
-                item.classList.add('text-slate-400');
-                if (item.getAttribute('data-tab') === tabName) {
-                    item.classList.add('text-primary');
-                    item.classList.remove('text-slate-400');
-                }
-            });
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function toggleAuthModal() {
-            const modal = document.getElementById('authModal');
-            modal.classList.toggle('hidden');
-        }
-
-        function toggleAuthMode() {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('authModalTitle').innerText = isRegisterMode ? "Register New Account" : "Login to Account";
-            document.getElementById('authSubmitBtn').innerText = isRegisterMode ? "Register" : "Login";
-            document.querySelector('#authModal button[type="button"]').innerText = isRegisterMode ? "Login instead" : "Register";
-            document.getElementById('authToggleText').innerText = isRegisterMode ? "Already have an account?" : "Don't have an account?";
-            
-            const confirmGroup = document.getElementById('confirmPasswordGroup');
-            if (isRegisterMode) {
-                confirmGroup.classList.remove('hidden');
-                document.getElementById('authConfirmPassword').setAttribute('required', 'true');
-            } else {
-                confirmGroup.classList.add('hidden');
-                document.getElementById('authConfirmPassword').removeAttribute('required');
-            }
-        }
-
-        function togglePasswordVisibility(inputId, iconId) {
-            const inputField = document.getElementById(inputId);
-            const icon = document.getElementById(iconId);
-            if (inputField.type === 'password') {
-                inputField.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                inputField.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-
-        async function handleAuthSubmit(event) {
-            event.preventDefault();
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-
-            try {
-                if (isRegisterMode) {
-                    const confirmPassword = document.getElementById('authConfirmPassword').value;
-                    if (password !== confirmPassword) {
-                        showToast("Passwords do not match!", "error");
-                        return;
-                    }
-                    await auth.createUserWithEmailAndPassword(email, password);
-                    showToast("Account registered successfully!", "success");
-                } else {
-                    await auth.signInWithEmailAndPassword(email, password);
-                    showToast("Logged in successfully!", "success");
-                }
-                toggleAuthModal();
-            } catch (err) {
-                console.error("Auth error:", err);
-                showToast(err.message, "error");
-            }
-        }
-
-        async function handleForgotPassword() {
-            const email = document.getElementById('authEmail').value.trim();
-            if (!email) {
-                showToast("Please enter your email address first to reset password.", "error");
-                return;
-            }
-            try {
-                await auth.sendPasswordResetEmail(email);
-                showToast("Password reset link sent to your email!", "success");
-            } catch (err) {
-                console.error("Forgot password error:", err);
-                showToast(err.message, "error");
-            }
-        }
-
-        async function handleAuthAction() {
-            if (currentUser && !currentUser.isAnonymous) {
-                await auth.signOut();
-                showToast("Logged out successfully.", "success");
-                switchTab('home');
-            } else {
-                toggleAuthModal();
-            }
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toastNotification');
-            document.getElementById('toastMessage').innerText = message;
-            document.getElementById('toastTitle').innerText = type === 'success' ? 'Success' : 'Notice';
-            document.getElementById('toastIcon').innerHTML = type === 'success' ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-triangle-exclamation"></i>';
-            
-            toast.classList.remove('translate-x-full');
-            setTimeout(() => {
-                toast.classList.add('translate-x-full');
-            }, 3500);
-        }
-    </script>
+  </div>
+
+  <div id="view-deposit" class="space-y-5 hidden">
+    <div class="bg-cardBg border border-borderCol rounded-2xl p-4 shadow-xl space-y-4">
+      <div><h3 class="text-sm font-bold text-white">Deposit Funds</h3><p class="text-xs text-slate-400">Add money to your wallet to purchase panels instantly.</p></div>
+      <div class="bg-slate-900/60 border border-slate-800 p-3 rounded-xl space-y-2">
+        <p class="text-xs font-semibold text-primary" id="minDepositNotice">Minimum Deposit: ৳ 50</p>
+        <div id="adminPaymentNumbers" class="space-y-1 text-xs text-slate-300"></div>
+        <p class="text-[11px] text-slate-400 italic mt-2 whitespace-pre-wrap" id="paymentInstructionsText">Send money to above numbers using Send Money option, then submit transaction details below.</p>
+      </div>
+      <form id="depositForm" onsubmit="submitDeposit(event)" class="space-y-3">
+        <div><label class="lbl">Select Gateway</label><select id="depositGateway" required class="inp"><option value="bKash">bKash Manual</option><option value="Nagad">Nagad Manual</option><option value="Binance">Binance Pay ID / USDT</option></select></div>
+        <div><label class="lbl">Amount (BDT)</label><input type="number" id="depositAmount" placeholder="e.g. 500" required class="inp"></div>
+        <div><label class="lbl">Sender Number / Account</label><input type="text" id="depositSender" placeholder="01XXXXXXXXX" required class="inp"></div>
+        <div><label class="lbl">Transaction ID (TrxID)</label><input type="text" id="depositTrxId" placeholder="e.g. 9N8H7G6F5D" required class="inp uppercase"></div>
+        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-primary to-rose-600 rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 hover:opacity-95 transition disabled:opacity-60" id="depositSubmitBtn">Submit Deposit Request</button>
+      </form>
+    </div>
+    <div class="space-y-3"><h4 class="text-xs font-bold text-slate-300 tracking-wider uppercase">My Deposit Logs</h4><div id="userDepositHistory" class="space-y-2"></div></div>
+  </div>
+
+  <div id="view-orders" class="space-y-4 hidden">
+    <h3 class="text-sm font-bold text-white">Order &amp; License History</h3>
+    <div id="userOrdersList" class="space-y-3"></div>
+  </div>
+
+  <div id="view-keys" class="space-y-4 hidden">
+    <h3 class="text-sm font-bold text-white">Delivered License Keys</h3>
+    <div id="userKeysList" class="space-y-3"></div>
+  </div>
+
+  <div id="view-account" class="space-y-4 hidden">
+    <div class="bg-cardBg border border-borderCol rounded-2xl p-5 text-center space-y-3 shadow-xl">
+      <div class="w-16 h-16 bg-primary/20 border border-primary/40 rounded-full flex items-center justify-center mx-auto text-primary text-2xl font-bold"><span id="accountInitial">G</span></div>
+      <div><h3 id="accountEmail" class="text-sm font-bold text-white">guest@panelbuybd.com</h3><p class="text-xs text-slate-400 mt-0.5">UID: <span id="accountUid" class="font-mono text-[10px]">Not logged in</span></p></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-cardBg border border-borderCol p-3.5 rounded-xl text-center"><p class="text-[10px] text-slate-400 font-medium">AVAILABLE BALANCE</p><p class="text-sm font-extrabold text-primary">৳ <span id="accountBalance">0.00</span></p></div>
+      <div class="bg-cardBg border border-borderCol p-3.5 rounded-xl text-center"><p class="text-[10px] text-slate-400 font-medium">TOTAL ORDER</p><p id="accountTotalOrders" class="text-sm font-extrabold text-white">0</p></div>
+      <div class="bg-cardBg border border-borderCol p-3.5 rounded-xl text-center"><p class="text-[10px] text-slate-400 font-medium">TOTAL SPENT</p><p class="text-sm font-extrabold text-emerald-400">৳ <span id="accountTotalSpent">0.00</span></p></div>
+      <div class="bg-cardBg border border-borderCol p-3.5 rounded-xl text-center"><p class="text-[10px] text-slate-400 font-medium">SUPPORT PIN</p><p id="accountSupportPin" class="text-sm font-extrabold text-amber-400 font-mono">----</p></div>
+    </div>
+    <a id="telegramSupportBtn" href="https://t.me/" target="_blank" class="w-full bg-cyan-600/20 border border-cyan-500/30 p-3 rounded-2xl flex items-center justify-between hover:bg-cyan-600/30 transition">
+      <div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-xl bg-cyan-500 flex items-center justify-center text-white text-lg"><i class="fa-brands fa-telegram"></i></div><div class="text-left"><h4 class="text-xs font-bold text-white">Official Telegram Support</h4><p class="text-[10px] text-cyan-300">Join our community &amp; get help</p></div></div>
+      <i class="fa-solid fa-chevron-right text-xs text-cyan-400"></i>
+    </a>
+    <button id="authActionButton" onclick="handleAuthAction()" class="w-full py-3 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-rose-400 hover:bg-slate-700/80 transition">Login / Register</button>
+  </div>
+</main>
+
+<nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-darkBg/95 backdrop-blur-lg border-t border-borderCol px-4 py-2.5 z-40 flex justify-around items-center">
+  <button onclick="switchTab('home')" class="nav-item flex flex-col items-center space-y-1 text-primary" data-tab="home"><i class="fa-solid fa-house text-base"></i><span class="text-[10px] font-medium">Home</span></button>
+  <button onclick="switchTab('deposit')" class="nav-item flex flex-col items-center space-y-1 text-slate-400" data-tab="deposit"><i class="fa-solid fa-wallet text-base"></i><span class="text-[10px] font-medium">Add Fund</span></button>
+  <button onclick="switchTab('orders')" class="nav-item flex flex-col items-center space-y-1 text-slate-400" data-tab="orders"><i class="fa-solid fa-receipt text-base"></i><span class="text-[10px] font-medium">Orders</span></button>
+  <button onclick="switchTab('keys')" class="nav-item flex flex-col items-center space-y-1 text-slate-400" data-tab="keys"><i class="fa-solid fa-key text-base"></i><span class="text-[10px] font-medium">My Keys</span></button>
+  <button onclick="switchTab('account')" class="nav-item flex flex-col items-center space-y-1 text-slate-400" data-tab="account"><i class="fa-solid fa-user-gear text-base"></i><span class="text-[10px] font-medium">Account</span></button>
+</nav>
+
+<!-- PRODUCT MODAL -->
+<div id="productModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="bg-cardBg border border-borderCol w-full max-w-md rounded-t-3xl sm:rounded-2xl max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-2xl">
+    <div class="flex items-center justify-between border-b border-borderCol pb-3"><h3 id="modalProductName" class="text-base font-bold text-white">Product Name</h3><button onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button></div>
+    <img id="modalProductImage" src="https://placehold.co/400x200/131b2e/e8135a?text=Panel" alt="Product" class="w-full h-36 object-cover rounded-xl border border-borderCol">
+    <div class="space-y-1.5"><label class="text-xs font-bold text-slate-300">Select Package Duration</label><div id="modalPackagesList" class="grid grid-cols-1 gap-2"></div></div>
+    <div class="flex space-x-2">
+      <a id="modalSetupLink" href="#" target="_blank" class="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold text-center border border-slate-700 flex items-center justify-center gap-1.5"><i class="fa-solid fa-book-open text-primary"></i> Setup Guide</a>
+      <a id="modalVideoLink" href="#" target="_blank" class="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold text-center border border-slate-700 flex items-center justify-center gap-1.5"><i class="fa-brands fa-youtube text-rose-500"></i> Video Tutorial</a>
+    </div>
+    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-1"><h5 class="text-[11px] font-bold text-rose-400 flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Rules &amp; Conditions</h5><p id="modalRulesText" class="text-[11px] text-slate-400 whitespace-pre-wrap">Make sure your device is supported before purchasing.</p></div>
+    <div id="modalMaintenanceAlert" class="hidden bg-amber-500/20 border border-amber-500/30 p-3 rounded-xl text-center space-y-1"><p class="text-xs font-bold text-amber-400"><i class="fa-solid fa-triangle-exclamation"></i> প্যানেল সাময়িকভাবে মেইনটেনেন্স!</p><p id="modalMaintMsg" class="text-[11px] text-slate-200 whitespace-pre-wrap">এই প্যানেলটি বর্তমানে মেইনটেনেন্সে রয়েছে।</p></div>
+    <button onclick="confirmPurchase()" id="confirmBuyBtn" class="w-full py-3 bg-gradient-to-r from-primary to-rose-600 rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 hover:opacity-95 transition">Purchase Now</button>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-cardBg border border-borderCol w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
+    <div class="flex items-center justify-between border-b border-borderCol pb-3"><h3 id="authModalTitle" class="text-sm font-bold text-white">Login to Account</h3><button onclick="toggleAuthModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button></div>
+    <form onsubmit="handleAuthSubmit(event)" class="space-y-3">
+      <div><label class="lbl">Email Address</label><input type="email" id="authEmail" required class="inp" placeholder="user@gmail.com"></div>
+      <div><label class="lbl">Password</label><div class="relative"><input type="password" id="authPassword" required class="inp pr-9" placeholder="••••••••"><button type="button" onclick="togglePasswordVisibility('authPassword','eyeIcon1')" class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs"><i id="eyeIcon1" class="fa-solid fa-eye"></i></button></div></div>
+      <div id="confirmPasswordGroup" class="hidden"><label class="lbl">Confirm Password</label><div class="relative"><input type="password" id="authConfirmPassword" class="inp pr-9" placeholder="••••••••"><button type="button" onclick="togglePasswordVisibility('authConfirmPassword','eyeIcon2')" class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs"><i id="eyeIcon2" class="fa-solid fa-eye"></i></button></div></div>
+      <div class="flex items-center justify-between text-[11px]"><span id="authToggleText" class="text-slate-400">Don't have an account?</span><button type="button" id="authModeBtn" onclick="toggleAuthMode()" class="text-primary font-bold hover:underline">Register</button></div>
+      <div class="text-right"><button type="button" onclick="handleForgotPassword()" class="text-[11px] text-cyan-400 hover:underline">Forgot Password?</button></div>
+      <button type="submit" id="authSubmitBtn" class="w-full py-2.5 bg-primary rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30">Login</button>
+    </form>
+  </div>
+</div>
+
+<div id="toastNotification" class="fixed top-16 right-4 z-[60] transform translate-x-[120%] transition-transform duration-300 bg-slate-900 border border-borderCol px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 max-w-[85%]">
+  <div id="toastIcon" class="w-6 h-6 shrink-0 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs"><i class="fa-solid fa-check"></i></div>
+  <div><h5 id="toastTitle" class="text-xs font-bold text-white">Success</h5><p id="toastMessage" class="text-[10px] text-slate-400">Done.</p></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDDsSGZd0wFp6FuJid2iWPRUNKvQb90zoc",authDomain:"panel-buy-bd.firebaseapp.com",projectId:"panel-buy-bd",storageBucket:"panel-buy-bd.firebasestorage.app",messagingSenderId:"864265229911",appId:"1:864265229911:web:7a55e73fdcffe5b5b8b512"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(),db=firebase.firestore(),appId="panel-buy-bd";
+const base=()=>db.collection('artifacts').doc(appId).collection('public').doc('data');
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let currentUser=null,userData={balance:0},allProducts=[],allCategories=[],selectedCategoryFilter='ALL',currentSelectedProduct=null,selectedPackageIndex=0,isRegisterMode=false,appSettings={},bannerTimer=null,currentSlide=0,purchasing=false,unsubUser=null,unsubOrders=null,unsubDeposits=null,toastTimer=null;
+
+auth.onAuthStateChanged(user=>{
+  [unsubUser,unsubOrders,unsubDeposits].forEach(f=>f&&f());unsubUser=unsubOrders=unsubDeposits=null;
+  if(user&&!user.isAnonymous){
+    currentUser=user;
+    $('authNavBtn').innerHTML='<i class="fa-solid fa-user-check text-xs text-primary"></i>';
+    $('authActionButton').innerText='Logout';
+    $('accountEmail').innerText=user.email;$('accountUid').innerText=user.uid;$('accountInitial').innerText=user.email.charAt(0).toUpperCase();
+    const ref=base().collection('users').doc(user.uid);
+    unsubUser=ref.onSnapshot(s=>{
+      if(s.exists){
+        userData=s.data();
+        if(userData.isBlocked){alert("Your account has been blocked by admin.");auth.signOut();return}
+        if(!userData.supportPin){ref.update({supportPin:String(Math.floor(1000+Math.random()*9000))})}
+      }else{
+        userData={email:user.email,balance:0,supportPin:String(Math.floor(1000+Math.random()*9000)),isBlocked:false,createdAt:new Date().toISOString()};
+        ref.set(userData);
+      }
+      $('userBalance').innerText=Number(userData.balance||0).toFixed(2);
+      $('accountBalance').innerText=Number(userData.balance||0).toFixed(2);
+      $('accountSupportPin').innerText=userData.supportPin||'----';
+    },e=>console.error("User stream error:",e));
+    loadUserOrdersAndStats();loadUserDeposits();
+  }else{
+    currentUser=null;userData={balance:0};
+    $('authNavBtn').innerHTML='<i class="fa-solid fa-user text-xs"></i>';
+    $('authActionButton').innerText='Login / Register';
+    $('accountEmail').innerText='guest@panelbuybd.com';$('accountUid').innerText='Not logged in';$('accountInitial').innerText='G';
+    ['userBalance','accountBalance','accountTotalSpent'].forEach(i=>$(i).innerText='0.00');
+    $('accountTotalOrders').innerText='0';$('accountSupportPin').innerText='----';
+    $('userOrdersList').innerHTML=$('userKeysList').innerHTML=$('userDepositHistory').innerHTML='<p class="text-center text-slate-500 text-xs py-6">Please login to see this.</p>';
+  }
+});
+
+window.addEventListener('DOMContentLoaded',()=>{initSettingsListener();initCategoriesListener();initProductsListener();renderCategories()});
+
+function initSettingsListener(){
+  base().collection('settings').doc('main').onSnapshot(s=>{
+    if(!s.exists)return;
+    appSettings=s.data();
+    if(appSettings.appLogo)$('appLogoContainer').innerHTML=`<img src="${esc(appSettings.appLogo)}" class="w-full h-full object-cover">`;
+    if(appSettings.liveNotice)$('liveNoticeText').innerText=appSettings.liveNotice;
+    if(appSettings.telegramSupport)$('telegramSupportBtn').href=appSettings.telegramSupport;
+    if(appSettings.minDeposit)$('minDepositNotice').innerText=`Minimum Deposit: ৳ ${appSettings.minDeposit}`;
+    if(appSettings.paymentInstructions)$('paymentInstructionsText').innerText=appSettings.paymentInstructions;
+    let n='';
+    if(appSettings.bkashNumber)n+=`<p><b>bKash (Send Money):</b> ${esc(appSettings.bkashNumber)}</p>`;
+    if(appSettings.nagadNumber)n+=`<p><b>Nagad (Send Money):</b> ${esc(appSettings.nagadNumber)}</p>`;
+    if(appSettings.binanceId)n+=`<p><b>Binance Pay ID/Address:</b> ${esc(appSettings.binanceId)}</p>`;
+    $('adminPaymentNumbers').innerHTML=n||'<p class="text-slate-500">Contact admin for deposit numbers.</p>';
+    if(typeof appSettings.banners==='string'&&appSettings.banners.trim()){
+      const lines=appSettings.banners.split('\n').filter(b=>b.trim());
+      $('bannerSliderContainer').innerHTML=lines.map(l=>{
+        const p=l.split('|'),img=p[0].trim(),link=p[1]?p[1].trim():'';
+        return `<div class="min-w-full h-full ${link?'cursor-pointer':''}" ${link?`data-link="${esc(link)}" onclick="window.open(this.dataset.link,'_blank')"`:''}><img src="${esc(img)}" alt="Banner" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x200/131b2e/e8135a?text=Panel+Buy+BD'"></div>`;
+      }).join('');
+      startAutoBannerSlider(lines.length);
+    }
+  },e=>console.log("Settings err:",e));
+}
+
+function startAutoBannerSlider(total){
+  if(bannerTimer)clearInterval(bannerTimer);
+  currentSlide=0;$('bannerSliderContainer').style.transform='translateX(0)';
+  if(total<=1)return;
+  bannerTimer=setInterval(()=>{currentSlide=(currentSlide+1)%total;$('bannerSliderContainer').style.transform=`translateX(-${currentSlide*100}%)`},3500);
+}
+
+function initCategoriesListener(){
+  base().collection('categories').onSnapshot(s=>{
+    allCategories=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(Number(a.sortOrder)||0)-(Number(b.sortOrder)||0));
+    renderCategories();
+  },e=>console.log("Categories err:",e));
+}
+function initProductsListener(){
+  base().collection('products').onSnapshot(s=>{
+    allProducts=s.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.active!==false);
+    renderProducts();
+  },e=>console.log("Products err:",e));
+}
+
+function renderCategories(){
+  const b=(name,label)=>`<button data-cat="${esc(name)}" class="cat-btn shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition ${selectedCategoryFilter===name?'bg-primary text-white shadow-md shadow-primary/20':'bg-cardBg text-slate-300 border border-borderCol'}">${esc(label)}</button>`;
+  $('categoryContainer').innerHTML=b('ALL','All Items')+allCategories.map(c=>b(c.name,c.name)).join('');
+}
+$('categoryContainer').addEventListener('click',e=>{const b=e.target.closest('.cat-btn');if(b)filterCategory(b.dataset.cat)});
+function filterCategory(n){selectedCategoryFilter=n;renderCategories();renderProducts()}
+
+function parsePackages(str){
+  if(!str)return[];
+  return String(str).split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
+    const p=l.split('|');
+    return p.length>=2?{name:p[0].trim(),price:Number(p[1].trim())||0,stock:p[2]?p[2].trim():'Available'}:null;
+  }).filter(Boolean);
+}
+function isOutOfStock(pkg){const s=String(pkg.stock).trim().toLowerCase();return s==='0'||s==='out'||s.includes('stock out')}
+
+function renderProducts(){
+  const list=selectedCategoryFilter==='ALL'?allProducts:allProducts.filter(p=>p.category===selectedCategoryFilter);
+  $('categoryCount').innerText=`${list.length} items`;
+  if(!list.length){$('productCatalogGrid').innerHTML='<div class="col-span-2 text-center py-10 text-slate-500 text-xs">No products found in this category.</div>';return}
+  $('productCatalogGrid').innerHTML=list.map(p=>{
+    const pk=parsePackages(p.packages),min=pk.length?Math.min(...pk.map(x=>x.price)):0;
+    const img=esc(p.image||'https://placehold.co/300x200/131b2e/e8135a?text=Panel');
+    return `<div data-pid="${esc(p.id)}" class="prod-card bg-cardBg border border-borderCol rounded-2xl overflow-hidden shadow-lg hover:border-primary/50 transition cursor-pointer flex flex-col justify-between">
+      <div><div class="h-28 relative overflow-hidden bg-slate-900"><img src="${img}" alt="" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/131b2e/e8135a?text=Panel'">
+      ${p.maintenance===true?'<span class="absolute top-2 left-2 bg-amber-500 text-slate-950 text-[9px] font-extrabold px-2 py-0.5 rounded-full z-10">MAINTENANCE</span>':''}
+      <span class="absolute top-2 right-2 bg-black/60 text-[10px] font-bold text-slate-200 px-2 py-0.5 rounded-full border border-white/10 z-10">${esc(p.category||'PANEL')}</span></div>
+      <div class="p-3 space-y-1"><h4 class="text-xs font-bold text-white line-clamp-1">${esc(p.name)}</h4><p class="text-[10px] text-slate-400 line-clamp-1">${esc(p.rules||'Secure anti-ban panel')}</p></div></div>
+      <div class="p-3 pt-2 flex items-center justify-between border-t border-borderCol/50 mt-2"><div><p class="text-[9px] text-slate-400">Starts from</p><p class="text-xs font-extrabold text-primary">৳ ${min}</p></div>
+      <button type="button" class="px-2.5 py-1.5 rounded-lg bg-primary text-white text-[11px] font-bold flex items-center gap-1 shadow-md shadow-primary/30"><i class="fa-solid fa-cart-shopping text-xs"></i> Buy</button></div></div>`;
+  }).join('');
+}
+// Buy বাটন ও কার্ড: একটাই ইভেন্ট হ্যান্ডলার (inline onclick আর ID quote সমস্যা নেই)
+$('productCatalogGrid').addEventListener('click',e=>{const c=e.target.closest('.prod-card');if(c)openProductModal(c.dataset.pid)});
+
+function updateBuyButton(){
+  const btn=$('confirmBuyBtn');if(!currentSelectedProduct)return;
+  if(currentSelectedProduct.maintenance===true){btn.innerHTML='Panel Under Maintenance';btn.classList.add('opacity-50','cursor-not-allowed');return}
+  const pk=parsePackages(currentSelectedProduct.packages),sel=pk[selectedPackageIndex];
+  if(!sel){btn.innerHTML='No package available';btn.classList.add('opacity-50','cursor-not-allowed');return}
+  if(isOutOfStock(sel)){btn.innerHTML='Stock Out';btn.classList.add('opacity-50','cursor-not-allowed');return}
+  btn.innerHTML=`Purchase Now (৳ ${sel.price})`;btn.classList.remove('opacity-50','cursor-not-allowed');
+}
+function openProductModal(id){
+  const p=allProducts.find(x=>String(x.id)===String(id));
+  if(!p){showToast("Product not found.","error");return}
+  currentSelectedProduct=p;selectedPackageIndex=0;
+  $('modalProductName').innerText=p.name||'Product';
+  $('modalProductImage').src=p.image||'https://placehold.co/400x200/131b2e/e8135a?text=Panel';
+  $('modalSetupLink').href=p.setupLink||'#';$('modalVideoLink').href=p.videoLink||'#';
+  $('modalRulesText').innerText=p.rules||'No specific rules.';
+  $('modalMaintenanceAlert').classList.toggle('hidden',p.maintenance!==true);
+  $('modalMaintMsg').innerText=(p.maintenanceMessage||'').trim()||'এই প্যানেলটি বর্তমানে মেইনটেনেন্সে রয়েছে।';
+  renderModalPackages();
+  const m=$('productModal');m.classList.remove('hidden');m.classList.add('flex');
+}
+function renderModalPackages(){
+  if(!currentSelectedProduct)return;
+  const pk=parsePackages(currentSelectedProduct.packages),list=$('modalPackagesList');
+  if(!pk.length){list.innerHTML='<p class="text-xs text-slate-400 text-center py-2">No packages available.</p>';updateBuyButton();return}
+  list.innerHTML=pk.map((x,i)=>{
+    const sel=i===selectedPackageIndex,out=isOutOfStock(x);
+    return `<div ${out?'':`onclick="selectPackage(${i})"`} class="p-3 rounded-xl border ${sel?'border-primary bg-primary/10':'border-borderCol bg-slate-900'} flex items-center justify-between ${out?'opacity-50':'cursor-pointer'} transition"><div><h5 class="text-xs font-bold text-white">${esc(x.name)}</h5><p class="text-[10px] text-slate-400">Stock: <span class="${out?'text-rose-400':'text-emerald-400'}">${out?'Stock Out':esc(x.stock)}</span></p></div><span class="text-xs font-extrabold text-primary">৳ ${x.price}</span></div>`;
+  }).join('');
+  updateBuyButton();
+}
+function selectPackage(i){selectedPackageIndex=i;renderModalPackages()}
+function closeProductModal(){const m=$('productModal');m.classList.add('hidden');m.classList.remove('flex');currentSelectedProduct=null}
+
+async function confirmPurchase(){
+  if(!currentUser){showToast("Please login first to purchase panels.","error");closeProductModal();toggleAuthModal();return}
+  if(!currentSelectedProduct||purchasing)return;
+  if(currentSelectedProduct.maintenance===true){showToast("This panel is under maintenance.","error");return}
+  const sel=parsePackages(currentSelectedProduct.packages)[selectedPackageIndex];
+  if(!sel){showToast("No active packages found.","error");return}
+  if(isOutOfStock(sel)){showToast("This package is out of stock.","error");return}
+  const price=sel.price;
+  if(Number(userData.balance||0)<price){showToast("Insufficient balance! Please Add Fund.","error");closeProductModal();switchTab('deposit');return}
+  purchasing=true;
+  try{
+    const b=db.batch();
+    b.update(base().collection('users').doc(currentUser.uid),{balance:firebase.firestore.FieldValue.increment(-price)});
+    b.set(base().collection('orders').doc(),{userId:currentUser.uid,userEmail:currentUser.email,productName:currentSelectedProduct.name,packageName:sel.name,price,status:'pending',licenseKey:'',createdAt:new Date().toISOString()});
+    await b.commit();
+    showToast("Order placed successfully! Check 'My Orders'.","success");
+    closeProductModal();switchTab('orders');
+  }catch(err){console.error("Purchase error:",err);showToast("Purchase failed: "+err.message,"error")}
+  purchasing=false;
+}
+
+let depositBusy=false;
+const normTrx=t=>String(t||'').trim().toUpperCase().replace(/\s+/g,'');
+const trxDocId=t=>encodeURIComponent(t).replace(/\./g,'%2E');
+async function submitDeposit(ev){
+  ev.preventDefault();
+  if(depositBusy)return; // একাধিক ট্যাপ ব্লক
+  if(!currentUser){showToast("Please login to submit deposit.","error");toggleAuthModal();return}
+  const amount=Number($('depositAmount').value),min=Number(appSettings.minDeposit||50),trx=normTrx($('depositTrxId').value);
+  if(!trx||trx.length>60){showToast("সঠিক Transaction ID দিন।","error");return}
+  if(!(amount>=min)){showToast(`Minimum deposit amount is ৳ ${min}`,"error");return}
+  depositBusy=true;const btn=$('depositSubmitBtn');btn.disabled=true;btn.innerText='Submitting...';
+  try{
+    const depRef=base().collection('deposits').doc(),trxRef=base().collection('usedTrx').doc(trxDocId(trx));
+    await db.runTransaction(async tx=>{
+      const t=await tx.get(trxRef);
+      if(t.exists)throw new Error('TRX_USED');
+      tx.set(trxRef,{userId:currentUser.uid,depositId:depRef.id,trxId:trx,createdAt:new Date().toISOString()});
+      tx.set(depRef,{userId:currentUser.uid,userEmail:currentUser.email,gateway:$('depositGateway').value,amount,sender:$('depositSender').value.trim(),trxId:trx,status:'pending',createdAt:new Date().toISOString()});
+    });
+    showToast("Deposit request submitted! Awaiting admin approval.","success");$('depositForm').reset();
+  }catch(err){
+    if(err.message==='TRX_USED')showToast("এই Transaction ID আগেই ব্যবহার হয়েছে। অ্যাডমিন রিজেক্ট না করলে আবার ব্যবহার করা যাবে না।","error");
+    else{console.error(err);showToast("Failed to submit deposit: "+err.message,"error")}
+  }
+  depositBusy=false;btn.disabled=false;btn.innerText='Submit Deposit Request';
+}
+
+function loadUserOrdersAndStats(){
+  if(!currentUser)return;if(unsubOrders)unsubOrders();
+  unsubOrders=base().collection('orders').where('userId','==',currentUser.uid).onSnapshot(s=>{
+    const orders=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    $('accountTotalOrders').innerText=orders.length;
+    $('accountTotalSpent').innerText=orders.filter(o=>o.status==='completed').reduce((a,o)=>a+Number(o.price||0),0).toFixed(2);
+    if(!orders.length){$('userOrdersList').innerHTML='<p class="text-center text-slate-500 text-xs py-6">No orders placed yet.</p>';$('userKeysList').innerHTML='<p class="text-center text-slate-500 text-xs py-6">No license keys delivered yet.</p>';return}
+    const badge={pending:'bg-amber-500/20 text-amber-400 border-amber-500/30',completed:'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',rejected:'bg-rose-500/20 text-rose-400 border-rose-500/30'};
+    $('userOrdersList').innerHTML=orders.map(o=>`<div class="bg-cardBg border border-borderCol rounded-xl p-3.5 space-y-2"><div class="flex items-center justify-between"><h5 class="text-xs font-bold text-white">${esc(o.productName)}</h5><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badge[o.status]||badge.pending}">${esc(o.status)}</span></div><div class="flex items-center justify-between text-[11px] text-slate-400"><span>Package: <b class="text-slate-200">${esc(o.packageName)}</b></span><span class="text-primary font-bold">৳ ${o.price}</span></div>${o.licenseKey?`<div class="bg-slate-900 border border-slate-800 p-2 rounded-lg flex items-center justify-between"><code class="text-xs font-mono text-emerald-400 break-all">${esc(o.licenseKey)}</code><button data-key="${esc(o.licenseKey)}" class="copy-btn text-xs text-slate-400 hover:text-white pl-2"><i class="fa-solid fa-copy"></i></button></div>`:''}</div>`).join('');
+    const keys=orders.filter(o=>o.status==='completed'&&o.licenseKey);
+    $('userKeysList').innerHTML=keys.map(o=>`<div class="bg-cardBg border border-borderCol rounded-xl p-3.5 space-y-2"><div class="flex items-center justify-between"><h5 class="text-xs font-bold text-white">${esc(o.productName)} (${esc(o.packageName)})</h5><span class="text-[10px] text-slate-400">${new Date(o.createdAt).toLocaleDateString()}</span></div><div class="bg-slate-900 border border-slate-800 p-2.5 rounded-lg flex items-center justify-between"><code class="text-xs font-mono text-emerald-400 font-bold break-all">${esc(o.licenseKey)}</code><button data-key="${esc(o.licenseKey)}" class="copy-btn ml-2 px-2.5 py-1 bg-primary/20 text-primary text-xs rounded-lg hover:bg-primary hover:text-white transition"><i class="fa-solid fa-copy"></i> Copy</button></div></div>`).join('')||'<p class="text-center text-slate-500 text-xs py-6">No license keys available yet.</p>';
+  },e=>console.log("Orders err:",e));
+}
+function loadUserDeposits(){
+  if(!currentUser)return;if(unsubDeposits)unsubDeposits();
+  unsubDeposits=base().collection('deposits').where('userId','==',currentUser.uid).onSnapshot(s=>{
+    const dep=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    if(!dep.length){$('userDepositHistory').innerHTML='<p class="text-center text-slate-500 text-xs py-4">No deposit logs found.</p>';return}
+    const col={pending:'text-amber-400 bg-amber-500/20 border-amber-500/30',approved:'text-emerald-400 bg-emerald-500/20 border-emerald-500/30',rejected:'text-rose-400 bg-rose-500/20 border-rose-500/30'};
+    $('userDepositHistory').innerHTML=dep.map(d=>`<div class="bg-cardBg border border-borderCol rounded-xl p-3 flex items-center justify-between"><div><div class="flex items-center space-x-2"><span class="text-xs font-bold text-white">${esc(d.gateway)}</span><span class="px-2 py-0.5 rounded text-[9px] font-bold border ${col[d.status]||col.pending}">${esc(String(d.status).toUpperCase())}</span></div><p class="text-[10px] text-slate-400 mt-0.5">TrxID: <b class="text-slate-300 font-mono">${esc(d.trxId)}</b></p></div><div class="text-right"><span class="text-xs font-extrabold text-primary">৳ ${d.amount}</span><p class="text-[9px] text-slate-500">${new Date(d.createdAt).toLocaleDateString()}</p></div></div>`).join('');
+  },e=>console.log("Deposits err:",e));
+}
+document.addEventListener('click',e=>{const b=e.target.closest('.copy-btn');if(b)copyKey(b.dataset.key)});
+function copyKey(key){
+  const ok=()=>showToast("License key copied!","success");
+  if(navigator.clipboard)navigator.clipboard.writeText(key).then(ok).catch(()=>fallback());else fallback();
+  function fallback(){const t=document.createElement('textarea');t.value=key;document.body.appendChild(t);t.select();try{document.execCommand('copy');ok()}catch(_){showToast("Failed to copy key.","error")}document.body.removeChild(t)}
+}
+
+function switchTab(tab){
+  ['home','deposit','orders','keys','account'].forEach(t=>$('view-'+t).classList.add('hidden'));
+  $('view-'+tab).classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(i=>{const on=i.dataset.tab===tab;i.classList.toggle('text-primary',on);i.classList.toggle('text-slate-400',!on)});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleAuthModal(){const m=$('authModal');m.classList.toggle('hidden');m.classList.toggle('flex')}
+function toggleAuthMode(){
+  isRegisterMode=!isRegisterMode;
+  $('authModalTitle').innerText=isRegisterMode?"Register New Account":"Login to Account";
+  $('authSubmitBtn').innerText=isRegisterMode?"Register":"Login";
+  $('authModeBtn').innerText=isRegisterMode?"Login instead":"Register";
+  $('authToggleText').innerText=isRegisterMode?"Already have an account?":"Don't have an account?";
+  $('confirmPasswordGroup').classList.toggle('hidden',!isRegisterMode);
+  $('authConfirmPassword').required=isRegisterMode;
+}
+function togglePasswordVisibility(inp,ico){
+  const f=$(inp),i=$(ico),show=f.type==='password';
+  f.type=show?'text':'password';i.classList.toggle('fa-eye',!show);i.classList.toggle('fa-eye-slash',show);
+}
+let authBusy=false;
+async function handleAuthSubmit(ev){
+  ev.preventDefault();if(authBusy)return;authBusy=true;setTimeout(()=>authBusy=false,1500);
+  const email=$('authEmail').value.trim(),pw=$('authPassword').value;
+  try{
+    if(isRegisterMode){
+      if(pw!==$('authConfirmPassword').value){showToast("Passwords do not match!","error");return}
+      await auth.createUserWithEmailAndPassword(email,pw);showToast("Account registered successfully!","success");
+    }else{await auth.signInWithEmailAndPassword(email,pw);showToast("Logged in successfully!","success")}
+    toggleAuthModal();
+  }catch(err){console.error(err);showToast(err.message,"error")}
+}
+async function handleForgotPassword(){
+  const email=$('authEmail').value.trim();
+  if(!email){showToast("Enter your email first to reset password.","error");return}
+  try{await auth.sendPasswordResetEmail(email);showToast("Password reset link sent to your email!","success")}
+  catch(err){showToast(err.message,"error")}
+}
+async function handleAuthAction(){
+  if(currentUser){await auth.signOut();showToast("Logged out successfully.","success");switchTab('home')}
+  else toggleAuthModal();
+}
+function showToast(msg,type='success'){
+  const t=$('toastNotification');
+  $('toastMessage').innerText=msg;$('toastTitle').innerText=type==='success'?'Success':'Notice';
+  $('toastIcon').innerHTML=type==='success'?'<i class="fa-solid fa-check"></i>':'<i class="fa-solid fa-triangle-exclamation"></i>';
+  t.classList.remove('translate-x-[120%]');clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.add('translate-x-[120%]'),3500);
+}
+</script>
 </body>
-                            </html>
+        </html>
