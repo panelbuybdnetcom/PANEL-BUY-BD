@@ -124,10 +124,7 @@ body{font-family:'Inter',sans-serif}
     <div class="flex items-center justify-between border-b border-borderCol pb-3"><h3 id="modalProductName" class="text-base font-bold text-white">Product Name</h3><button onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button></div>
     <img id="modalProductImage" src="https://placehold.co/400x200/131b2e/e8135a?text=Panel" alt="Product" class="w-full h-36 object-cover rounded-xl border border-borderCol">
     <div class="space-y-1.5"><label class="text-xs font-bold text-slate-300">Select Package Duration</label><div id="modalPackagesList" class="grid grid-cols-1 gap-2"></div></div>
-    <div class="flex space-x-2">
-      <a id="modalSetupLink" href="#" target="_blank" class="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold text-center border border-slate-700 flex items-center justify-center gap-1.5"><i class="fa-solid fa-book-open text-primary"></i> Setup Guide</a>
-      <a id="modalVideoLink" href="#" target="_blank" class="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold text-center border border-slate-700 flex items-center justify-center gap-1.5"><i class="fa-brands fa-youtube text-rose-500"></i> Video Tutorial</a>
-    </div>
+    <button type="button" id="modalFilesBtn" class="files-btn w-full py-3 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl text-xs font-bold text-white shadow-lg"><i class="fa-solid fa-circle-play"></i> FILE &amp; SETUP (Download / Video)</button>
     <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-1"><h5 class="text-[11px] font-bold text-rose-400 flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Rules &amp; Conditions</h5><p id="modalRulesText" class="text-[11px] text-slate-400 whitespace-pre-wrap">Make sure your device is supported before purchasing.</p></div>
     <div id="modalMaintenanceAlert" class="hidden bg-amber-500/20 border border-amber-500/30 p-3 rounded-xl text-center space-y-1"><p class="text-xs font-bold text-amber-400"><i class="fa-solid fa-triangle-exclamation"></i> প্যানেল সাময়িকভাবে মেইনটেনেন্স!</p><p id="modalMaintMsg" class="text-[11px] text-slate-200 whitespace-pre-wrap">এই প্যানেলটি বর্তমানে মেইনটেনেন্সে রয়েছে।</p></div>
     <button onclick="confirmPurchase()" id="confirmBuyBtn" class="w-full py-3 bg-gradient-to-r from-primary to-rose-600 rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 hover:opacity-95 transition">Purchase Now</button>
@@ -146,6 +143,15 @@ body{font-family:'Inter',sans-serif}
       <div class="text-right"><button type="button" onclick="handleForgotPassword()" class="text-[11px] text-cyan-400 hover:underline">Forgot Password?</button></div>
       <button type="submit" id="authSubmitBtn" class="w-full py-2.5 bg-primary rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30">Login</button>
     </form>
+  </div>
+</div>
+
+<!-- FILE & SETUP POPUP -->
+<div id="fileModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[55] hidden items-center justify-center p-4" onclick="if(event.target===this)closeFileModal()">
+  <div class="bg-cardBg border-2 border-emerald-500/70 w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-2xl max-h-[88vh] overflow-y-auto">
+    <div class="flex items-center justify-between gap-3"><h3 id="fileModalTitle" class="text-sm font-extrabold text-white uppercase">Product</h3><button onclick="closeFileModal()" class="w-9 h-9 shrink-0 rounded-full bg-slate-800 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button></div>
+    <div id="fileLinksList" class="space-y-3"></div>
+    <p class="text-[10px] text-slate-400 text-center leading-relaxed">ফাইল ডাউনলোড করে সেটআপ ভিডিও দেখে ইন্সটল করুন, তারপর কেনা Key দিয়ে ব্যবহার করুন।</p>
   </div>
 </div>
 
@@ -275,13 +281,39 @@ function renderProducts(){
       ${p.maintenance===true?'<span class="absolute top-2 left-2 bg-amber-500 text-slate-950 text-[9px] font-extrabold px-2 py-0.5 rounded-full z-10">MAINTENANCE</span>':''}
       <span class="absolute top-2 right-2 bg-black/60 text-[10px] font-bold text-slate-200 px-2 py-0.5 rounded-full border border-white/10 z-10">${esc(p.category||'PANEL')}</span></div>
       <div class="p-3 space-y-1"><h4 class="text-xs font-bold text-white line-clamp-1">${esc(p.name)}</h4><p class="text-[10px] text-slate-400 line-clamp-1">${esc(p.rules||'Secure anti-ban panel')}</p></div></div>
-      <div class="p-3 pt-2 flex items-center justify-between border-t border-borderCol/50 mt-2"><div><p class="text-[9px] text-slate-400">Starts from</p><p class="text-xs font-extrabold text-primary">৳ ${min}</p></div>
-      <button type="button" class="px-2.5 py-1.5 rounded-lg bg-primary text-white text-[11px] font-bold flex items-center gap-1 shadow-md shadow-primary/30"><i class="fa-solid fa-cart-shopping text-xs"></i> Buy</button></div></div>`;
+      <div class="p-3 pt-2 border-t border-borderCol/50 mt-2"><div class="flex items-center justify-between"><div><p class="text-[9px] text-slate-400">Starts from</p><p class="text-xs font-extrabold text-primary">৳ ${min}</p></div>
+      <button type="button" class="px-2.5 py-1.5 rounded-lg bg-primary text-white text-[11px] font-bold flex items-center gap-1 shadow-md shadow-primary/30"><i class="fa-solid fa-cart-shopping text-xs"></i> Buy</button></div>
+      <button type="button" data-pid="${esc(p.id)}" class="files-btn w-full mt-2 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[11px] font-bold flex items-center justify-center gap-1"><i class="fa-solid fa-circle-play"></i> FILE &amp; SETUP</button></div></div>`;
   }).join('');
 }
 // Buy বাটন ও কার্ড: একটাই ইভেন্ট হ্যান্ডলার (inline onclick আর ID quote সমস্যা নেই)
-$('productCatalogGrid').addEventListener('click',e=>{const c=e.target.closest('.prod-card');if(c)openProductModal(c.dataset.pid)});
+$('productCatalogGrid').addEventListener('click',e=>{if(e.target.closest('.files-btn'))return;const c=e.target.closest('.prod-card');if(c)openProductModal(c.dataset.pid)});
 
+const LINK_STYLES={details:['from-green-600 to-green-700','fa-graduation-cap'],video:['from-red-500 to-red-600','fa-play'],download:['from-violet-500 to-purple-600','fa-download'],other:['from-blue-500 to-blue-600','fa-comments']};
+function guessType(label){const l=label.toLowerCase();if(/download|ডাউনলোড|apk|file/.test(l))return 'download';if(/video|setup|ভিডিও|সেটআপ/.test(l))return 'video';if(/detail|বিস্তারিত/.test(l))return 'details';return 'other'}
+function getProductLinks(p){
+  const out=[];
+  String(p.fileLinks||'').split('\n').forEach(line=>{
+    const a=line.split('|').map(x=>x.trim());
+    if(a[0]&&a[1]&&/^https?:\/\//i.test(a[1])){const t=(a[2]||'').toLowerCase();out.push({label:a[0],url:a[1],type:LINK_STYLES[t]?t:guessType(a[0])})}
+  });
+  if(!out.length){
+    if(p.setupLink&&/^https?:\/\//i.test(p.setupLink))out.push({label:'Setup Guide',url:p.setupLink,type:'details'});
+    if(p.videoLink&&/^https?:\/\//i.test(p.videoLink))out.push({label:'Video Tutorial',url:p.videoLink,type:'video'});
+  }
+  return out;
+}
+function openFileModal(id,byName){
+  const p=allProducts.find(x=>byName?x.name===id:String(x.id)===String(id));
+  if(!p){showToast("প্রোডাক্ট খুঁজে পাওয়া যায়নি।","error");return}
+  const links=getProductLinks(p);
+  $('fileModalTitle').innerText=p.name;
+  $('fileLinksList').innerHTML=links.length?links.map(l=>{const st=LINK_STYLES[l.type];
+    return `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 px-4 py-3.5 rounded-full bg-gradient-to-r ${st[0]} text-white text-xs font-bold shadow-lg active:scale-[.98] transition"><i class="fa-solid ${st[1]} w-5 text-center"></i><span class="flex-1 leading-snug">${esc(l.label)}</span><i class="fa-solid fa-chevron-right text-[10px]"></i></a>`}).join('')
+    :'<p class="text-center text-slate-400 text-xs py-4">এখনো কোনো ফাইল বা সেটআপ লিংক দেওয়া হয়নি।</p>';
+  const m=$('fileModal');m.classList.remove('hidden');m.classList.add('flex');
+}
+function closeFileModal(){const m=$('fileModal');m.classList.add('hidden');m.classList.remove('flex')}
 function updateBuyButton(){
   const btn=$('confirmBuyBtn');if(!currentSelectedProduct)return;
   if(currentSelectedProduct.maintenance===true){btn.innerHTML='Panel Under Maintenance';btn.classList.add('opacity-50','cursor-not-allowed');return}
@@ -296,7 +328,7 @@ function openProductModal(id){
   currentSelectedProduct=p;selectedPackageIndex=0;
   $('modalProductName').innerText=p.name||'Product';
   $('modalProductImage').src=p.image||'https://placehold.co/400x200/131b2e/e8135a?text=Panel';
-  $('modalSetupLink').href=p.setupLink||'#';$('modalVideoLink').href=p.videoLink||'#';
+  $('modalFilesBtn').dataset.pid=p.id;
   $('modalRulesText').innerText=p.rules||'No specific rules.';
   $('modalMaintenanceAlert').classList.toggle('hidden',p.maintenance!==true);
   $('modalMaintMsg').innerText=(p.maintenanceMessage||'').trim()||'এই প্যানেলটি বর্তমানে মেইনটেনেন্সে রয়েছে।';
@@ -374,7 +406,7 @@ function loadUserOrdersAndStats(){
     const badge={pending:'bg-amber-500/20 text-amber-400 border-amber-500/30',completed:'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',rejected:'bg-rose-500/20 text-rose-400 border-rose-500/30'};
     $('userOrdersList').innerHTML=orders.map(o=>`<div class="bg-cardBg border border-borderCol rounded-xl p-3.5 space-y-2"><div class="flex items-center justify-between"><h5 class="text-xs font-bold text-white">${esc(o.productName)}</h5><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badge[o.status]||badge.pending}">${esc(o.status)}</span></div><div class="flex items-center justify-between text-[11px] text-slate-400"><span>Package: <b class="text-slate-200">${esc(o.packageName)}</b></span><span class="text-primary font-bold">৳ ${o.price}</span></div>${o.licenseKey?`<div class="bg-slate-900 border border-slate-800 p-2 rounded-lg flex items-center justify-between"><code class="text-xs font-mono text-emerald-400 break-all">${esc(o.licenseKey)}</code><button data-key="${esc(o.licenseKey)}" class="copy-btn text-xs text-slate-400 hover:text-white pl-2"><i class="fa-solid fa-copy"></i></button></div>`:''}</div>`).join('');
     const keys=orders.filter(o=>o.status==='completed'&&o.licenseKey);
-    $('userKeysList').innerHTML=keys.map(o=>`<div class="bg-cardBg border border-borderCol rounded-xl p-3.5 space-y-2"><div class="flex items-center justify-between"><h5 class="text-xs font-bold text-white">${esc(o.productName)} (${esc(o.packageName)})</h5><span class="text-[10px] text-slate-400">${new Date(o.createdAt).toLocaleDateString()}</span></div><div class="bg-slate-900 border border-slate-800 p-2.5 rounded-lg flex items-center justify-between"><code class="text-xs font-mono text-emerald-400 font-bold break-all">${esc(o.licenseKey)}</code><button data-key="${esc(o.licenseKey)}" class="copy-btn ml-2 px-2.5 py-1 bg-primary/20 text-primary text-xs rounded-lg hover:bg-primary hover:text-white transition"><i class="fa-solid fa-copy"></i> Copy</button></div></div>`).join('')||'<p class="text-center text-slate-500 text-xs py-6">No license keys available yet.</p>';
+    $('userKeysList').innerHTML=keys.map(o=>`<div class="bg-cardBg border border-borderCol rounded-xl p-3.5 space-y-2"><div class="flex items-center justify-between"><h5 class="text-xs font-bold text-white">${esc(o.productName)} (${esc(o.packageName)})</h5><span class="text-[10px] text-slate-400">${new Date(o.createdAt).toLocaleDateString()}</span></div><div class="bg-slate-900 border border-slate-800 p-2.5 rounded-lg flex items-center justify-between"><code class="text-xs font-mono text-emerald-400 font-bold break-all">${esc(o.licenseKey)}</code><button data-key="${esc(o.licenseKey)}" class="copy-btn ml-2 px-2.5 py-1 bg-primary/20 text-primary text-xs rounded-lg hover:bg-primary hover:text-white transition"><i class="fa-solid fa-copy"></i> Copy</button></div><button type="button" data-pid="${esc(o.productName)}" data-byname="1" class="files-btn w-full py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl text-[11px] font-bold text-white flex items-center justify-center gap-1.5"><i class="fa-solid fa-download"></i> DOWNLOAD &amp; SETUP</button></div>`).join('')||'<p class="text-center text-slate-500 text-xs py-6">No license keys available yet.</p>';
   },e=>console.log("Orders err:",e));
 }
 function loadUserDeposits(){
@@ -386,7 +418,7 @@ function loadUserDeposits(){
     $('userDepositHistory').innerHTML=dep.map(d=>`<div class="bg-cardBg border border-borderCol rounded-xl p-3 flex items-center justify-between"><div><div class="flex items-center space-x-2"><span class="text-xs font-bold text-white">${esc(d.gateway)}</span><span class="px-2 py-0.5 rounded text-[9px] font-bold border ${col[d.status]||col.pending}">${esc(String(d.status).toUpperCase())}</span></div><p class="text-[10px] text-slate-400 mt-0.5">TrxID: <b class="text-slate-300 font-mono">${esc(d.trxId)}</b></p></div><div class="text-right"><span class="text-xs font-extrabold text-primary">৳ ${d.amount}</span><p class="text-[9px] text-slate-500">${new Date(d.createdAt).toLocaleDateString()}</p></div></div>`).join('');
   },e=>console.log("Deposits err:",e));
 }
-document.addEventListener('click',e=>{const b=e.target.closest('.copy-btn');if(b)copyKey(b.dataset.key)});
+document.addEventListener('click',e=>{const b=e.target.closest('.copy-btn');if(b)copyKey(b.dataset.key);const f=e.target.closest('.files-btn');if(f)openFileModal(f.dataset.pid,f.dataset.byname==='1')});
 function copyKey(key){
   const ok=()=>showToast("License key copied!","success");
   if(navigator.clipboard)navigator.clipboard.writeText(key).then(ok).catch(()=>fallback());else fallback();
@@ -444,4 +476,4 @@ function showToast(msg,type='success'){
 }
 </script>
 </body>
-        </html>
+                                                                                                                                                                                                                                                                                                                             </html>
