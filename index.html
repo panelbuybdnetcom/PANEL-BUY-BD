@@ -173,18 +173,37 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 
 let currentUser=null,userData={balance:0},allProducts=[],allCategories=[],selectedCategoryFilter='ALL',currentSelectedProduct=null,selectedPackageIndex=0,isRegisterMode=false,appSettings={},bannerTimer=null,currentSlide=0,purchasing=false,unsubUser=null,unsubOrders=null,unsubDeposits=null,toastTimer=null;
 
-auth.onAuthStateChanged(user=>{
+/* ---- এক সময়ে একটাই ডিভাইসে লগইন (Single Session) ---- */
+let justLoggedIn=false,claiming=false;const memSid={};
+const getSid=u=>{try{return localStorage.getItem('pbd_sid_'+u)||memSid[u]||null}catch(_){return memSid[u]||null}};
+const setSid=(u,v)=>{memSid[u]=v;try{v?localStorage.setItem('pbd_sid_'+u,v):localStorage.removeItem('pbd_sid_'+u)}catch(_){}};
+async function claimSession(user){
+  const sid=Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+  setSid(user.uid,sid); // আগে লোকালে সেট, তারপর সার্ভারে লেখা (নিজেকে নিজে কিক এড়াতে)
+  const ref=base().collection('users').doc(user.uid),now=new Date().toISOString();
+  await db.runTransaction(async tx=>{
+    const d=await tx.get(ref);
+    if(d.exists)tx.update(ref,{activeSession:sid,sessionAt:now});
+    else tx.set(ref,{email:user.email,balance:0,supportPin:String(Math.floor(1000+Math.random()*9000)),isBlocked:false,createdAt:now,activeSession:sid,sessionAt:now});
+  });
+}
+auth.onAuthStateChanged(async user=>{
   [unsubUser,unsubOrders,unsubDeposits].forEach(f=>f&&f());unsubUser=unsubOrders=unsubDeposits=null;
   if(user&&!user.isAnonymous){
     currentUser=user;
     $('authNavBtn').innerHTML='<i class="fa-solid fa-user-check text-xs text-primary"></i>';
     $('authActionButton').innerText='Logout';
     $('accountEmail').innerText=user.email;$('accountUid').innerText=user.uid;$('accountInitial').innerText=user.email.charAt(0).toUpperCase();
+    if(justLoggedIn){justLoggedIn=false;try{await claimSession(user)}catch(e){setSid(user.uid,null);showToast("Session error: "+e.message,"error")}}
+    if(auth.currentUser!==user)return;
     const ref=base().collection('users').doc(user.uid);
     unsubUser=ref.onSnapshot(s=>{
       if(s.exists){
         userData=s.data();
         if(userData.isBlocked){alert("Your account has been blocked by admin.");auth.signOut();return}
+        const mine=getSid(user.uid);
+        if(userData.activeSession&&mine&&userData.activeSession!==mine){setSid(user.uid,null);showToast("অন্য ডিভাইস/ব্রাউজারে এই আইডি লগইন হয়েছে, তাই এখান থেকে লগআউট করা হলো।","error");auth.signOut();return}
+        if(!mine&&!claiming){claiming=true;claimSession(user).catch(()=>{}).finally(()=>claiming=false)}
         if(!userData.supportPin){ref.update({supportPin:String(Math.floor(1000+Math.random()*9000))})}
       }else{
         userData={email:user.email,balance:0,supportPin:String(Math.floor(1000+Math.random()*9000)),isBlocked:false,createdAt:new Date().toISOString()};
@@ -452,10 +471,10 @@ async function handleAuthSubmit(ev){
   try{
     if(isRegisterMode){
       if(pw!==$('authConfirmPassword').value){showToast("Passwords do not match!","error");return}
-      await auth.createUserWithEmailAndPassword(email,pw);showToast("Account registered successfully!","success");
-    }else{await auth.signInWithEmailAndPassword(email,pw);showToast("Logged in successfully!","success")}
+      justLoggedIn=true;await auth.createUserWithEmailAndPassword(email,pw);showToast("Account registered successfully!","success");
+    }else{justLoggedIn=true;await auth.signInWithEmailAndPassword(email,pw);showToast("Logged in successfully!","success")}
     toggleAuthModal();
-  }catch(err){console.error(err);showToast(err.message,"error")}
+  }catch(err){justLoggedIn=false;console.error(err);showToast(err.message,"error")}
 }
 async function handleForgotPassword(){
   const email=$('authEmail').value.trim();
@@ -464,7 +483,7 @@ async function handleForgotPassword(){
   catch(err){showToast(err.message,"error")}
 }
 async function handleAuthAction(){
-  if(currentUser){await auth.signOut();showToast("Logged out successfully.","success");switchTab('home')}
+  if(currentUser){setSid(currentUser.uid,null);await auth.signOut();showToast("Logged out successfully.","success");switchTab('home')}
   else toggleAuthModal();
 }
 function showToast(msg,type='success'){
@@ -476,4 +495,4 @@ function showToast(msg,type='success'){
 }
 </script>
 </body>
-                                                                                                                                                                                                                                                                                                                             </html>
+        </html>
