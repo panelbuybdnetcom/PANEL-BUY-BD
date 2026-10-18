@@ -146,6 +146,18 @@ body{font-family:'Inter',sans-serif}
   </div>
 </div>
 
+<!-- WELCOME POPUP -->
+<div id="welcomeModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] hidden items-center justify-center p-4" onclick="if(event.target===this)closeWelcome()">
+  <div class="bg-white text-slate-900 w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl max-h-[92vh] overflow-y-auto">
+    <img id="welcomeImg" src="" alt="" class="w-full object-cover hidden">
+    <div class="p-5 space-y-3">
+      <p id="welcomeText" class="text-sm leading-relaxed text-center whitespace-pre-wrap"></p>
+      <div id="welcomeButtons" class="space-y-2.5"></div>
+      <button onclick="closeWelcome()" class="w-full py-3 rounded-full bg-red-600 hover:bg-red-700 text-white font-extrabold text-base"><i class="fa-solid fa-xmark mr-1"></i> CLOSE</button>
+    </div>
+  </div>
+</div>
+
 <!-- FILE & SETUP POPUP -->
 <div id="fileModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[55] hidden items-center justify-center p-4" onclick="if(event.target===this)closeFileModal()">
   <div class="bg-cardBg border-2 border-emerald-500/70 w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-2xl max-h-[88vh] overflow-y-auto">
@@ -230,7 +242,7 @@ window.addEventListener('DOMContentLoaded',()=>{initSettingsListener();initCateg
 function initSettingsListener(){
   base().collection('settings').doc('main').onSnapshot(s=>{
     if(!s.exists)return;
-    appSettings=s.data();
+    appSettings=s.data();maybeShowWelcome();
     if(appSettings.appLogo)$('appLogoContainer').innerHTML=`<img src="${esc(appSettings.appLogo)}" class="w-full h-full object-cover">`;
     if(appSettings.liveNotice)$('liveNoticeText').innerText=appSettings.liveNotice;
     if(appSettings.telegramSupport)$('telegramSupportBtn').href=appSettings.telegramSupport;
@@ -251,6 +263,37 @@ function initSettingsListener(){
     }
   },e=>console.log("Settings err:",e));
 }
+
+/* ---- Welcome Popup (অ্যাডমিন থেকে নিয়ন্ত্রিত) ---- */
+let welcomeDone=false;
+const POP_STYLES={telegram:['from-sky-500 to-blue-600','fa-brands fa-telegram'],youtube:['from-red-500 to-red-600','fa-brands fa-youtube'],video:['from-red-500 to-red-600','fa-solid fa-play'],download:['from-violet-500 to-purple-600','fa-solid fa-download'],other:['from-emerald-500 to-green-600','fa-solid fa-link']};
+function parsePopupButtons(str){
+  return String(str||'').split('\n').map(l=>l.split('|').map(x=>x.trim())).filter(a=>a[0]&&a[1]&&/^https?:\/\//i.test(a[1])).map(a=>{
+    const u=a[1].toLowerCase();let k=(a[2]||'').toLowerCase();
+    if(!POP_STYLES[k])k=(u.includes('t.me')||u.includes('telegram'))?'telegram':(u.includes('youtube')||u.includes('youtu.be'))?'youtube':'other';
+    return {label:a[0],url:a[1],kind:k};
+  });
+}
+function maybeShowWelcome(){
+  if(welcomeDone)return;
+  const s=appSettings;if(s.popupEnabled!==true)return;
+  const btns=parsePopupButtons(s.popupButtons);
+  if(!s.popupImage&&!s.popupText&&!btns.length)return;
+  welcomeDone=true;
+  const mode=s.popupMode||'always',ver=String(s.popupVer||'');
+  try{
+    if(mode==='session'){if(sessionStorage.getItem('pbd_wp')===ver)return;sessionStorage.setItem('pbd_wp',ver)}
+    if(mode==='daily'){const k=new Date().toDateString()+'|'+ver;if(localStorage.getItem('pbd_wp_d')===k)return;localStorage.setItem('pbd_wp_d',k)}
+    if(mode==='once'){if(localStorage.getItem('pbd_wp_o')===ver)return;localStorage.setItem('pbd_wp_o',ver)}
+  }catch(_){}
+  const img=$('welcomeImg');
+  if(s.popupImage){img.onerror=()=>img.classList.add('hidden');img.src=s.popupImage;img.classList.remove('hidden')}else img.classList.add('hidden');
+  $('welcomeText').innerText=s.popupText||'';$('welcomeText').classList.toggle('hidden',!s.popupText);
+  $('welcomeButtons').innerHTML=btns.map(b=>{const st=POP_STYLES[b.kind];
+    return `<a href="${esc(b.url)}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r ${st[0]} text-white text-sm font-extrabold shadow-lg active:scale-[.98] transition"><i class="${st[1]}"></i><span>${esc(b.label)}</span></a>`}).join('');
+  const m=$('welcomeModal');m.classList.remove('hidden');m.classList.add('flex');
+}
+function closeWelcome(){const m=$('welcomeModal');m.classList.add('hidden');m.classList.remove('flex')}
 
 function startAutoBannerSlider(total){
   if(bannerTimer)clearInterval(bannerTimer);
@@ -495,4 +538,4 @@ function showToast(msg,type='success'){
 }
 </script>
 </body>
-        </html>
+</html>
