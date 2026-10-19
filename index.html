@@ -15,6 +15,10 @@ body{font-family:'Inter',sans-serif}
 .no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
 .inp{width:100%;background:#0f172a;border:1px solid #1e293b;border-radius:12px;padding:8px 12px;font-size:12px;color:#fff;outline:none}
 .inp:focus{border-color:#e8135a}.lbl{display:block;font-size:11px;font-weight:700;color:#cbd5e1;margin-bottom:4px}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.35)}}
+.live-dot{animation:livePulse 1.4s ease-in-out infinite}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.ro-new{animation:slideIn .4s ease-out}
 </style>
 </head>
 <body class="bg-darkBg text-slate-100 min-h-screen pb-24 selection:bg-primary selection:text-white">
@@ -59,6 +63,16 @@ body{font-family:'Inter',sans-serif}
     <div class="space-y-3">
       <div class="flex items-center justify-between"><h3 class="text-sm font-bold text-white tracking-wide">Available Products</h3><span class="text-[10px] text-primary font-semibold flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> 100% Secure</span></div>
       <div id="productCatalogGrid" class="grid grid-cols-2 gap-3.5"></div>
+    </div>
+
+    <!-- RECENT ORDERS (LIVE) : শুধু Completed অর্ডার দেখাবে -->
+    <div id="recentOrdersSection" class="bg-cardBg border border-borderCol rounded-2xl p-4 shadow-xl">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2"><span class="live-dot w-2.5 h-2.5 rounded-full bg-emerald-500"></span><h3 class="text-sm font-bold text-white tracking-wide">Recent Orders</h3></div>
+        <span class="flex items-center gap-1.5 px-3 py-1 rounded-full border border-borderCol text-[10px] font-bold tracking-widest text-slate-300"><span class="live-dot w-1.5 h-1.5 rounded-full bg-emerald-400"></span>LIVE</span>
+      </div>
+      <div class="flex items-center justify-between text-[10px] font-bold tracking-widest text-slate-500 uppercase pb-2 border-b border-borderCol"><span>Customer</span><span>Status</span></div>
+      <div id="recentOrdersList" class="divide-y divide-borderCol/60"><p class="text-center text-slate-500 text-xs py-6">Loading...</p></div>
     </div>
   </div>
 
@@ -237,7 +251,60 @@ auth.onAuthStateChanged(async user=>{
   }
 });
 
-window.addEventListener('DOMContentLoaded',()=>{initSettingsListener();initCategoriesListener();initProductsListener();renderCategories()});
+window.addEventListener('DOMContentLoaded',()=>{initSettingsListener();initCategoriesListener();initProductsListener();renderCategories();initRecentOrdersListener()});
+
+/* ============================================================
+   RECENT ORDERS (LIVE) — শুধু admin Complete করা অর্ডার দেখাবে
+   Pending / Rejected অর্ডার কখনো দেখানো হবে না।
+   ============================================================ */
+const RO_LIMIT=10;
+const RO_COLORS=['#6d28d9','#7c3aed','#f59e0b','#ef4444','#b45309','#10b981','#3b82f6','#0ea5e9','#ec4899','#14b8a6'];
+let unsubRecent=null,roFallbackTried=false,roSeen=new Set(),roFirstLoad=true;
+
+// ইউজারের নাম: ইমেইলের @ এর আগের অংশ, প্রাইভেসির জন্য শেষের দিক আংশিক লুকানো
+function roDisplayName(email){
+  const local=String(email||'').split('@')[0].replace(/[._\-+0-9]+/g,' ').trim()||String(email||'User').split('@')[0]||'User';
+  const parts=local.split(/\s+/).filter(Boolean).map(w=>w.charAt(0).toUpperCase()+w.slice(1));
+  let name=parts.join(' ')||'User';
+  if(name.length>10)name=name.slice(0,10);
+  return name+(String(email||'').split('@')[0].length>3?'***':'');
+}
+function roColor(str){let h=0;for(const c of String(str||'x'))h=(h*31+c.charCodeAt(0))>>>0;return RO_COLORS[h%RO_COLORS.length]}
+
+function renderRecentOrders(orders){
+  const box=$('recentOrdersList');
+  // নিরাপত্তা: ক্লায়েন্ট সাইডেও আবার ফিল্টার — শুধু completed
+  const list=orders.filter(o=>String(o.status).toLowerCase()==='completed')
+    .sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,RO_LIMIT);
+  if(!list.length){box.innerHTML='<p class="text-center text-slate-500 text-xs py-6">এখনো কোনো Completed অর্ডার নেই।</p>';return}
+  box.innerHTML=list.map(o=>{
+    const name=roDisplayName(o.userEmail),isNew=!roFirstLoad&&!roSeen.has(o.id);
+    return `<div class="flex items-center justify-between gap-3 py-3 ${isNew?'ro-new':''}">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white font-semibold text-base" style="background:${roColor(o.userEmail||o.id)}">${esc(name.charAt(0).toUpperCase())}</div>
+        <div class="min-w-0"><p class="text-sm font-semibold text-white truncate">${esc(name)}</p><p class="text-[11px] text-slate-400 truncate">${esc(o.productName||'')} - ${esc(o.packageName||'')}</p></div>
+      </div>
+      <span class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-emerald-500 bg-emerald-500/10 text-emerald-400 text-xs font-bold"><i class="fa-solid fa-circle-check"></i>Completed</span>
+    </div>`;
+  }).join('');
+  roSeen=new Set(list.map(o=>o.id));roFirstLoad=false;
+}
+
+function initRecentOrdersListener(){
+  if(unsubRecent)unsubRecent();
+  // প্রাথমিক কোয়েরি: status=completed + নতুন আগে (Firestore composite index লাগবে)
+  const q=roFallbackTried
+    ? base().collection('orders').where('status','==','completed').limit(60)
+    : base().collection('orders').where('status','==','completed').orderBy('createdAt','desc').limit(RO_LIMIT);
+  unsubRecent=q.onSnapshot(s=>{
+    renderRecentOrders(s.docs.map(d=>({id:d.id,...d.data()})));
+  },e=>{
+    console.log("Recent orders err:",e);
+    // index না থাকলে সহজ কোয়েরিতে ফলব্যাক
+    if(!roFallbackTried&&(e.code==='failed-precondition')){roFallbackTried=true;initRecentOrdersListener();return}
+    $('recentOrdersList').innerHTML='<p class="text-center text-slate-500 text-xs py-6">Recent orders লোড করা যায়নি।</p>';
+  });
+}
 
 function initSettingsListener(){
   base().collection('settings').doc('main').onSnapshot(s=>{
