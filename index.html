@@ -65,7 +65,6 @@ body{font-family:'Inter',sans-serif}
       <div id="productCatalogGrid" class="grid grid-cols-2 gap-3.5"></div>
     </div>
 
-    <!-- RECENT ORDERS (LIVE) : শুধু Completed অর্ডার দেখাবে -->
     <div id="recentOrdersSection" class="bg-cardBg border border-borderCol rounded-2xl p-4 shadow-xl">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2"><span class="live-dot w-2.5 h-2.5 rounded-full bg-emerald-500"></span><h3 class="text-sm font-bold text-white tracking-wide">Recent Orders</h3></div>
@@ -108,7 +107,8 @@ body{font-family:'Inter',sans-serif}
   <div id="view-account" class="space-y-4 hidden">
     <div class="bg-cardBg border border-borderCol rounded-2xl p-5 text-center space-y-3 shadow-xl">
       <div class="w-16 h-16 bg-primary/20 border border-primary/40 rounded-full flex items-center justify-center mx-auto text-primary text-2xl font-bold"><span id="accountInitial">G</span></div>
-      <div><h3 id="accountEmail" class="text-sm font-bold text-white">guest@panelbuybd.com</h3><p class="text-xs text-slate-400 mt-0.5">UID: <span id="accountUid" class="font-mono text-[10px]">Not logged in</span></p></div>
+      <div><h3 id="accountEmail" class="text-sm font-bold text-white">guest@panelbuybd.com</h3><p class="text-xs text-slate-400 mt-0.5">UID: <span id="accountUid" class="font-mono text-[10px]">Not logged in</span></p>
+        <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-mobile-screen text-[10px]"></i> <span id="accountPhone" class="font-mono">Not added</span> <button type="button" id="linkPhoneBtn" onclick="openPhoneLink()" class="ml-1 text-primary font-bold hover:underline">Add</button></p></div>
     </div>
     <div class="grid grid-cols-2 gap-3">
       <div class="bg-cardBg border border-borderCol p-3.5 rounded-xl text-center"><p class="text-[10px] text-slate-400 font-medium">AVAILABLE BALANCE</p><p class="text-sm font-extrabold text-primary">৳ <span id="accountBalance">0.00</span></p></div>
@@ -147,9 +147,19 @@ body{font-family:'Inter',sans-serif}
 
 <!-- AUTH MODAL -->
 <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-  <div class="bg-cardBg border border-borderCol w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
+  <div class="bg-cardBg border border-borderCol w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
     <div class="flex items-center justify-between border-b border-borderCol pb-3"><h3 id="authModalTitle" class="text-sm font-bold text-white">Login to Account</h3><button onclick="toggleAuthModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button></div>
-    <form onsubmit="handleAuthSubmit(event)" class="space-y-3">
+    <button type="button" id="googleBtn" onclick="signInWithGoogle()" class="auth-social w-full py-2.5 bg-white hover:bg-slate-100 rounded-xl text-xs font-bold text-slate-800 flex items-center justify-center gap-2 shadow"><i class="fa-brands fa-google text-rose-500"></i> Continue with Google</button>
+    <div class="auth-social flex items-center gap-2 text-[10px] text-slate-500 font-semibold"><span class="flex-1 h-px bg-borderCol"></span>OR<span class="flex-1 h-px bg-borderCol"></span></div>
+    
+    <!-- Auth Method Tabs (Email / Phone) -->
+    <div id="authMethodTabs" class="grid grid-cols-2 gap-1 p-1 bg-slate-900 rounded-xl border border-borderCol">
+      <button type="button" id="tabEmail" onclick="setAuthMethod('email')" class="py-2 rounded-lg text-[11px] font-bold transition bg-primary text-white"><i class="fa-solid fa-envelope mr-1"></i>Email</button>
+      <button type="button" id="tabPhone" onclick="setAuthMethod('phone')" class="py-2 rounded-lg text-[11px] font-bold transition text-slate-400 hover:text-white"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
+    </div>
+
+    <!-- EMAIL FORM -->
+    <form id="emailAuthForm" onsubmit="handleAuthSubmit(event)" class="space-y-3">
       <div><label class="lbl">Email Address</label><input type="email" id="authEmail" required class="inp" placeholder="user@gmail.com"></div>
       <div><label class="lbl">Password</label><div class="relative"><input type="password" id="authPassword" required class="inp pr-9" placeholder="••••••••"><button type="button" onclick="togglePasswordVisibility('authPassword','eyeIcon1')" class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs"><i id="eyeIcon1" class="fa-solid fa-eye"></i></button></div></div>
       <div id="confirmPasswordGroup" class="hidden"><label class="lbl">Confirm Password</label><div class="relative"><input type="password" id="authConfirmPassword" class="inp pr-9" placeholder="••••••••"><button type="button" onclick="togglePasswordVisibility('authConfirmPassword','eyeIcon2')" class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs"><i id="eyeIcon2" class="fa-solid fa-eye"></i></button></div></div>
@@ -157,6 +167,23 @@ body{font-family:'Inter',sans-serif}
       <div class="text-right"><button type="button" onclick="handleForgotPassword()" class="text-[11px] text-cyan-400 hover:underline">Forgot Password?</button></div>
       <button type="submit" id="authSubmitBtn" class="w-full py-2.5 bg-primary rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30">Login</button>
     </form>
+
+    <!-- PHONE (OTP) FORM -->
+    <div id="phoneAuthBox" class="hidden space-y-3">
+      <div id="phoneStep1" class="space-y-3">
+        <div><label class="lbl">Mobile Number</label>
+          <div class="flex"><span class="px-3 flex items-center bg-slate-800 border border-slate-700 border-r-0 rounded-l-xl text-xs text-slate-300 font-mono">+880</span><input type="tel" id="phoneInput" inputmode="numeric" maxlength="14" class="inp !rounded-l-none min-w-0" placeholder="01XXXXXXXXX"></div>
+          <p class="text-[10px] text-slate-500 mt-1">নম্বরে একটি ৬ ডিজিটের OTP SMS আসবে। নতুন নম্বর হলে অ্যাকাউন্ট নিজে থেকেই তৈরি হবে।</p></div>
+        <div id="recaptchaBox"></div>
+        <button type="button" id="sendOtpBtn" onclick="sendOtp()" class="w-full py-2.5 bg-primary rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 disabled:opacity-60">Send OTP</button>
+      </div>
+      <div id="phoneStep2" class="hidden space-y-3">
+        <p class="text-[11px] text-slate-400">OTP পাঠানো হয়েছে: <b id="otpPhoneLabel" class="text-white font-mono"></b></p>
+        <input type="text" id="otpInput" inputmode="numeric" maxlength="6" autocomplete="one-time-code" class="inp text-center tracking-[.5em] font-mono text-base" placeholder="••••••">
+        <button type="button" id="verifyOtpBtn" onclick="verifyOtp()" class="w-full py-2.5 bg-primary rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 disabled:opacity-60">Verify &amp; Continue</button>
+        <button type="button" onclick="resetPhoneFlow(true)" class="w-full text-[11px] text-cyan-400 hover:underline">নম্বর বদলান / আবার OTP নিন</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -199,18 +226,102 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 
 let currentUser=null,userData={balance:0},allProducts=[],allCategories=[],selectedCategoryFilter='ALL',currentSelectedProduct=null,selectedPackageIndex=0,isRegisterMode=false,appSettings={},bannerTimer=null,currentSlide=0,purchasing=false,unsubUser=null,unsubOrders=null,unsubDeposits=null,toastTimer=null;
 
+/* ---- Auth Method Switcher (Email / Phone) ---- */
+function setAuthMethod(method){
+  const tabEmail=$('tabEmail'), tabPhone=$('tabPhone'), emailForm=$('emailAuthForm'), phoneBox=$('phoneAuthBox');
+  if(method==='email'){
+    tabEmail.className="py-2 rounded-lg text-[11px] font-bold transition bg-primary text-white shadow";
+    tabPhone.className="py-2 rounded-lg text-[11px] font-bold transition text-slate-400 hover:text-white";
+    emailForm.classList.remove('hidden');
+    phoneBox.classList.add('hidden');
+  }else{
+    tabPhone.className="py-2 rounded-lg text-[11px] font-bold transition bg-primary text-white shadow";
+    tabEmail.className="py-2 rounded-lg text-[11px] font-bold transition text-slate-400 hover:text-white";
+    phoneBox.classList.remove('hidden');
+    emailForm.classList.add('hidden');
+    setupRecaptcha();
+  }
+}
+
+/* ---- Google Sign In ---- */
+async function signInWithGoogle(){
+  const provider=new firebase.auth.GoogleAuthProvider();
+  try{
+    justLoggedIn=true;
+    await auth.signInWithPopup(provider);
+    showToast("Google Login Successful!","success");
+    toggleAuthModal();
+  }catch(err){
+    justLoggedIn=false;
+    console.error(err);
+    showToast("Google Sign-In failed: "+err.message,"error");
+  }
+}
+
+/* ---- Phone OTP Setup ---- */
+let recaptchaVerifier=null,confirmationResult=null;
+function setupRecaptcha(){
+  if(recaptchaVerifier)return;
+  try{
+    recaptchaVerifier=new firebase.auth.RecaptchaVerifier('recaptchaBox',{
+      'size':'normal',
+      'callback':()=>{}
+    },auth);
+    recaptchaVerifier.render();
+  }catch(e){console.log("Recaptcha init err:",e)}
+}
+async function sendOtp(){
+  const num=$('phoneInput').value.trim();
+  if(!num || num.length<10){showToast("সঠিক মোবাইল নম্বর দিন।","error");return}
+  const fullNum=num.startsWith('+')?num:(num.startsWith('88')?'+'+num:'+88'+num);
+  const btn=$('sendOtpBtn');btn.disabled=true;btn.innerText='Sending OTP...';
+  try{
+    setupRecaptcha();
+    confirmationResult=await auth.signInWithPhoneNumber(fullNum,recaptchaVerifier);
+    $('otpPhoneLabel').innerText=fullNum;
+    $('phoneStep1').classList.add('hidden');$('phoneStep2').classList.remove('hidden');
+    showToast("OTP কোড পাঠানো হয়েছে!","success");
+  }catch(err){
+    console.error(err);
+    showToast("OTP পাঠানো যায়নি: "+err.message,"error");
+  }
+  btn.disabled=false;btn.innerText='Send OTP';
+}
+async function verifyOtp(){
+  const code=$('otpInput').value.trim();
+  if(!code || code.length!==6){showToast("৬ ডিজিটের সঠিক OTP দিন।","error");return}
+  const btn=$('verifyOtpBtn');btn.disabled=true;btn.innerText='Verifying...';
+  try{
+    justLoggedIn=true;
+    await confirmationResult.confirm(code);
+    showToast("Phone Login Successful!","success");
+    toggleAuthModal();
+    resetPhoneFlow(false);
+  }catch(err){
+    justLoggedIn=false;
+    console.error(err);
+    showToast("OTP ভুল বা মেয়াদোত্তীর্ণ: "+err.message,"error");
+  }
+  btn.disabled=false;btn.innerText='Verify & Continue';
+}
+function resetPhoneFlow(clearInput=false){
+  if(clearInput)$('phoneInput').value='';$('otpInput').value='';
+  $('phoneStep2').classList.add('hidden');$('phoneStep1').classList.remove('hidden');
+  confirmationResult=null;
+}
+
 /* ---- এক সময়ে একটাই ডিভাইসে লগইন (Single Session) ---- */
 let justLoggedIn=false,claiming=false;const memSid={};
 const getSid=u=>{try{return localStorage.getItem('pbd_sid_'+u)||memSid[u]||null}catch(_){return memSid[u]||null}};
 const setSid=(u,v)=>{memSid[u]=v;try{v?localStorage.setItem('pbd_sid_'+u,v):localStorage.removeItem('pbd_sid_'+u)}catch(_){}};
 async function claimSession(user){
   const sid=Date.now().toString(36)+Math.random().toString(36).slice(2,10);
-  setSid(user.uid,sid); // আগে লোকালে সেট, তারপর সার্ভারে লেখা (নিজেকে নিজে কিক এড়াতে)
+  setSid(user.uid,sid);
   const ref=base().collection('users').doc(user.uid),now=new Date().toISOString();
   await db.runTransaction(async tx=>{
     const d=await tx.get(ref);
     if(d.exists)tx.update(ref,{activeSession:sid,sessionAt:now});
-    else tx.set(ref,{email:user.email,balance:0,supportPin:String(Math.floor(1000+Math.random()*9000)),isBlocked:false,createdAt:now,activeSession:sid,sessionAt:now});
+    else tx.set(ref,{email:user.email||user.phoneNumber||'PhoneUser',balance:0,supportPin:String(Math.floor(1000+Math.random()*9000)),isBlocked:false,createdAt:now,activeSession:sid,sessionAt:now});
   });
 }
 auth.onAuthStateChanged(async user=>{
@@ -219,7 +330,11 @@ auth.onAuthStateChanged(async user=>{
     currentUser=user;
     $('authNavBtn').innerHTML='<i class="fa-solid fa-user-check text-xs text-primary"></i>';
     $('authActionButton').innerText='Logout';
-    $('accountEmail').innerText=user.email;$('accountUid').innerText=user.uid;$('accountInitial').innerText=user.email.charAt(0).toUpperCase();
+    const identifier=user.email||user.phoneNumber||'User';
+    $('accountEmail').innerText=identifier;
+    $('accountUid').innerText=user.uid;
+    $('accountInitial').innerText=identifier.charAt(0).toUpperCase();
+    if(user.phoneNumber) $('accountPhone').innerText = user.phoneNumber;
     if(justLoggedIn){justLoggedIn=false;try{await claimSession(user)}catch(e){setSid(user.uid,null);showToast("Session error: "+e.message,"error")}}
     if(auth.currentUser!==user)return;
     const ref=base().collection('users').doc(user.uid);
@@ -232,36 +347,28 @@ auth.onAuthStateChanged(async user=>{
         if(!mine&&!claiming){claiming=true;claimSession(user).catch(()=>{}).finally(()=>claiming=false)}
         if(!userData.supportPin){ref.update({supportPin:String(Math.floor(1000+Math.random()*9000))})}
       }else{
-        userData={email:user.email,balance:0,supportPin:String(Math.floor(1000+Math.random()*9000)),isBlocked:false,createdAt:new Date().toISOString()};
+        userData={email:user.email||user.phoneNumber||'User',balance:0,supportPin:String(Math.floor(1000+Math.random()*9000)),isBlocked:false,createdAt:new Date().toISOString()};
         ref.set(userData);
       }
       $('userBalance').innerText=Number(userData.balance||0).toFixed(2);
-      $('accountBalance').innerText=Number(userData.balance||0).toFixed(2);
-      $('accountSupportPin').innerText=userData.supportPin||'----';
+      $('accountBalance').innerText=Number(userData.balance||0).toFixed(2);$('accountSupportPin').innerText=userData.supportPin||'----';
     },e=>console.error("User stream error:",e));
     loadUserOrdersAndStats();loadUserDeposits();
   }else{
     currentUser=null;userData={balance:0};
     $('authNavBtn').innerHTML='<i class="fa-solid fa-user text-xs"></i>';
     $('authActionButton').innerText='Login / Register';
-    $('accountEmail').innerText='guest@panelbuybd.com';$('accountUid').innerText='Not logged in';$('accountInitial').innerText='G';
-    ['userBalance','accountBalance','accountTotalSpent'].forEach(i=>$(i).innerText='0.00');
-    $('accountTotalOrders').innerText='0';$('accountSupportPin').innerText='----';
-    $('userOrdersList').innerHTML=$('userKeysList').innerHTML=$('userDepositHistory').innerHTML='<p class="text-center text-slate-500 text-xs py-6">Please login to see this.</p>';
+    $('accountEmail').innerText='guest@panelbuybd.com';$('accountUid').innerText='Not logged in';$('accountInitial').innerText='G';$('accountPhone').innerText='Not added';
+    ['userBalance','accountBalance','accountTotalSpent'].forEach(i=>$(i).innerText='0.00');$('accountTotalOrders').innerText='0';$('accountSupportPin').innerText='----';$('userOrdersList').innerHTML=$('userKeysList').innerHTML=$('userDepositHistory').innerHTML='<p class="text-center text-slate-500 text-xs py-6">Please login to see this.</p>';
   }
 });
 
 window.addEventListener('DOMContentLoaded',()=>{initSettingsListener();initCategoriesListener();initProductsListener();renderCategories();initRecentOrdersListener()});
 
-/* ============================================================
-   RECENT ORDERS (LIVE) — শুধু admin Complete করা অর্ডার দেখাবে
-   Pending / Rejected অর্ডার কখনো দেখানো হবে না।
-   ============================================================ */
 const RO_LIMIT=10;
 const RO_COLORS=['#6d28d9','#7c3aed','#f59e0b','#ef4444','#b45309','#10b981','#3b82f6','#0ea5e9','#ec4899','#14b8a6'];
 let unsubRecent=null,roFallbackTried=false,roSeen=new Set(),roFirstLoad=true;
 
-// ইউজারের নাম: ইমেইলের @ এর আগের অংশ, প্রাইভেসির জন্য শেষের দিক আংশিক লুকানো
 function roDisplayName(email){
   const local=String(email||'').split('@')[0].replace(/[._\-+0-9]+/g,' ').trim()||String(email||'User').split('@')[0]||'User';
   const parts=local.split(/\s+/).filter(Boolean).map(w=>w.charAt(0).toUpperCase()+w.slice(1));
@@ -273,7 +380,6 @@ function roColor(str){let h=0;for(const c of String(str||'x'))h=(h*31+c.charCode
 
 function renderRecentOrders(orders){
   const box=$('recentOrdersList');
-  // নিরাপত্তা: ক্লায়েন্ট সাইডেও আবার ফিল্টার — শুধু completed
   const list=orders.filter(o=>String(o.status).toLowerCase()==='completed')
     .sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,RO_LIMIT);
   if(!list.length){box.innerHTML='<p class="text-center text-slate-500 text-xs py-6">এখনো কোনো Completed অর্ডার নেই।</p>';return}
@@ -292,7 +398,6 @@ function renderRecentOrders(orders){
 
 function initRecentOrdersListener(){
   if(unsubRecent)unsubRecent();
-  // প্রাথমিক কোয়েরি: status=completed + নতুন আগে (Firestore composite index লাগবে)
   const q=roFallbackTried
     ? base().collection('orders').where('status','==','completed').limit(60)
     : base().collection('orders').where('status','==','completed').orderBy('createdAt','desc').limit(RO_LIMIT);
@@ -300,7 +405,6 @@ function initRecentOrdersListener(){
     renderRecentOrders(s.docs.map(d=>({id:d.id,...d.data()})));
   },e=>{
     console.log("Recent orders err:",e);
-    // index না থাকলে সহজ কোয়েরিতে ফলব্যাক
     if(!roFallbackTried&&(e.code==='failed-precondition')){roFallbackTried=true;initRecentOrdersListener();return}
     $('recentOrdersList').innerHTML='<p class="text-center text-slate-500 text-xs py-6">Recent orders লোড করা যায়নি।</p>';
   });
@@ -331,7 +435,6 @@ function initSettingsListener(){
   },e=>console.log("Settings err:",e));
 }
 
-/* ---- Welcome Popup (অ্যাডমিন থেকে নিয়ন্ত্রিত) ---- */
 let welcomeDone=false;
 const POP_STYLES={telegram:['from-sky-500 to-blue-600','fa-brands fa-telegram'],youtube:['from-red-500 to-red-600','fa-brands fa-youtube'],video:['from-red-500 to-red-600','fa-solid fa-play'],download:['from-violet-500 to-purple-600','fa-solid fa-download'],other:['from-emerald-500 to-green-600','fa-solid fa-link']};
 function parsePopupButtons(str){
@@ -415,7 +518,6 @@ function renderProducts(){
       <button type="button" data-pid="${esc(p.id)}" class="files-btn w-full mt-2 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[11px] font-bold flex items-center justify-center gap-1"><i class="fa-solid fa-circle-play"></i> FILE &amp; SETUP</button></div></div>`;
   }).join('');
 }
-// Buy বাটন ও কার্ড: একটাই ইভেন্ট হ্যান্ডলার (inline onclick আর ID quote সমস্যা নেই)
 $('productCatalogGrid').addEventListener('click',e=>{if(e.target.closest('.files-btn'))return;const c=e.target.closest('.prod-card');if(c)openProductModal(c.dataset.pid)});
 
 const LINK_STYLES={details:['from-green-600 to-green-700','fa-graduation-cap'],video:['from-red-500 to-red-600','fa-play'],download:['from-violet-500 to-purple-600','fa-download'],other:['from-blue-500 to-blue-600','fa-comments']};
@@ -490,7 +592,7 @@ async function confirmPurchase(){
   try{
     const b=db.batch();
     b.update(base().collection('users').doc(currentUser.uid),{balance:firebase.firestore.FieldValue.increment(-price)});
-    b.set(base().collection('orders').doc(),{userId:currentUser.uid,userEmail:currentUser.email,productName:currentSelectedProduct.name,packageName:sel.name,price,status:'pending',licenseKey:'',createdAt:new Date().toISOString()});
+    b.set(base().collection('orders').doc(),{userId:currentUser.uid,userEmail:currentUser.email||currentUser.phoneNumber,productName:currentSelectedProduct.name,packageName:sel.name,price,status:'pending',licenseKey:'',createdAt:new Date().toISOString()});
     await b.commit();
     showToast("Order placed successfully! Check 'My Orders'.","success");
     closeProductModal();switchTab('orders');
@@ -503,7 +605,7 @@ const normTrx=t=>String(t||'').trim().toUpperCase().replace(/\s+/g,'');
 const trxDocId=t=>encodeURIComponent(t).replace(/\./g,'%2E');
 async function submitDeposit(ev){
   ev.preventDefault();
-  if(depositBusy)return; // একাধিক ট্যাপ ব্লক
+  if(depositBusy)return;
   if(!currentUser){showToast("Please login to submit deposit.","error");toggleAuthModal();return}
   const amount=Number($('depositAmount').value),min=Number(appSettings.minDeposit||50),trx=normTrx($('depositTrxId').value);
   if(!trx||trx.length>60){showToast("সঠিক Transaction ID দিন।","error");return}
@@ -515,7 +617,7 @@ async function submitDeposit(ev){
       const t=await tx.get(trxRef);
       if(t.exists)throw new Error('TRX_USED');
       tx.set(trxRef,{userId:currentUser.uid,depositId:depRef.id,trxId:trx,createdAt:new Date().toISOString()});
-      tx.set(depRef,{userId:currentUser.uid,userEmail:currentUser.email,gateway:$('depositGateway').value,amount,sender:$('depositSender').value.trim(),trxId:trx,status:'pending',createdAt:new Date().toISOString()});
+      tx.set(depRef,{userId:currentUser.uid,userEmail:currentUser.email||currentUser.phoneNumber,gateway:$('depositGateway').value,amount,sender:$('depositSender').value.trim(),trxId:trx,status:'pending',createdAt:new Date().toISOString()});
     });
     showToast("Deposit request submitted! Awaiting admin approval.","success");$('depositForm').reset();
   }catch(err){
@@ -605,4 +707,4 @@ function showToast(msg,type='success'){
 }
 </script>
 </body>
-</html>
+  </html>
