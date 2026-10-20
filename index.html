@@ -149,7 +149,28 @@ body{font-family:'Inter',sans-serif}
 <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
   <div class="bg-cardBg border border-borderCol w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
     <div class="flex items-center justify-between border-b border-borderCol pb-3"><h3 id="authModalTitle" class="text-sm font-bold text-white">Login to Account</h3><button onclick="toggleAuthModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button></div>
-    <form onsubmit="handleAuthSubmit(event)" class="space-y-3">
+    <button type="button" onclick="signInWithGoogle()" class="w-full py-2.5 bg-white hover:bg-slate-100 text-slate-900 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow transition"><i class="fa-brands fa-google text-red-500 text-sm"></i> Continue with Google</button>
+    <div class="flex items-center gap-3"><span class="flex-1 h-px bg-borderCol"></span><span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">or</span><span class="flex-1 h-px bg-borderCol"></span></div>
+    <div class="grid grid-cols-2 gap-2">
+      <button type="button" id="tabEmail" onclick="setAuthMethod('email')" class="py-2 rounded-xl text-xs font-bold transition bg-primary text-white"><i class="fa-solid fa-envelope mr-1"></i> Email</button>
+      <button type="button" id="tabPhone" onclick="setAuthMethod('phone')" class="py-2 rounded-xl text-xs font-bold transition bg-slate-800 text-slate-300"><i class="fa-solid fa-mobile-screen mr-1"></i> Phone</button>
+    </div>
+    <div id="recaptcha-container"></div>
+    <form id="phoneAuthForm" onsubmit="event.preventDefault()" class="space-y-3 hidden">
+      <div id="phoneStep1" class="space-y-3">
+        <div><label class="lbl">Mobile Number</label>
+          <div class="flex items-center gap-2"><span class="px-3 py-2 rounded-xl bg-slate-900 border border-borderCol text-xs font-bold text-slate-300">+88</span><input type="tel" id="authPhone" inputmode="numeric" maxlength="14" class="inp" placeholder="01XXXXXXXXX"></div>
+          <p class="text-[10px] text-slate-500 mt-1">নম্বরে একটি 6 ডিজিটের OTP SMS যাবে। নতুন নম্বর হলে অ্যাকাউন্ট নিজে থেকেই তৈরি হবে।</p></div>
+        <button type="button" id="sendOtpBtn" onclick="sendPhoneOtp()" class="w-full py-2.5 bg-primary rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 disabled:opacity-60">Send OTP</button>
+      </div>
+      <div id="phoneStep2" class="space-y-3 hidden">
+        <p class="text-[11px] text-slate-400">OTP পাঠানো হয়েছে: <b id="otpSentTo" class="text-slate-200"></b></p>
+        <div><label class="lbl">6-digit OTP</label><input type="text" id="authOtp" inputmode="numeric" maxlength="6" autocomplete="one-time-code" class="inp text-center tracking-[.5em] font-mono" placeholder="••••••"></div>
+        <button type="button" id="verifyOtpBtn" onclick="verifyPhoneOtp()" class="w-full py-2.5 bg-primary rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 disabled:opacity-60">Verify &amp; Login</button>
+        <div class="flex items-center justify-between text-[11px]"><button type="button" onclick="resetPhoneAuth()" class="text-slate-400 hover:text-white">নম্বর বদলান</button><button type="button" id="resendOtpBtn" onclick="sendPhoneOtp()" disabled class="text-primary font-bold disabled:text-slate-500">Resend OTP</button></div>
+      </div>
+    </form>
+    <form id="emailAuthForm" onsubmit="handleAuthSubmit(event)" class="space-y-3">
       <div><label class="lbl">Email Address</label><input type="email" id="authEmail" required class="inp" placeholder="user@gmail.com"></div>
       <div><label class="lbl">Password</label><div class="relative"><input type="password" id="authPassword" required class="inp pr-9" placeholder="••••••••"><button type="button" onclick="togglePasswordVisibility('authPassword','eyeIcon1')" class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs"><i id="eyeIcon1" class="fa-solid fa-eye"></i></button></div></div>
       <div id="confirmPasswordGroup" class="hidden"><label class="lbl">Confirm Password</label><div class="relative"><input type="password" id="authConfirmPassword" class="inp pr-9" placeholder="••••••••"><button type="button" onclick="togglePasswordVisibility('authConfirmPassword','eyeIcon2')" class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs"><i id="eyeIcon2" class="fa-solid fa-eye"></i></button></div></div>
@@ -203,14 +224,18 @@ let currentUser=null,userData={balance:0},allProducts=[],allCategories=[],select
 let justLoggedIn=false,claiming=false;const memSid={};
 const getSid=u=>{try{return localStorage.getItem('pbd_sid_'+u)||memSid[u]||null}catch(_){return memSid[u]||null}};
 const setSid=(u,v)=>{memSid[u]=v;try{v?localStorage.setItem('pbd_sid_'+u,v):localStorage.removeItem('pbd_sid_'+u)}catch(_){}};
+/* ---- লগইন পদ্ধতি অনুযায়ী ইউজার প্রোফাইল ফিল্ড (email / google / phone) ---- */
+function loginMethodOf(user){const p=(user.providerData&&user.providerData[0]&&user.providerData[0].providerId)||'';return p==='google.com'?'google':p==='phone'?'phone':'email'}
+function profileFields(user){return {email:user.email||'',phone:user.phoneNumber||'',name:user.displayName||'',loginMethod:loginMethodOf(user)}}
+function profileUpdate(user){const o={loginMethod:loginMethodOf(user)};if(user.email)o.email=user.email;if(user.phoneNumber)o.phone=user.phoneNumber;if(user.displayName)o.name=user.displayName;return o}
 async function claimSession(user){
   const sid=Date.now().toString(36)+Math.random().toString(36).slice(2,10);
   setSid(user.uid,sid); // আগে লোকালে সেট, তারপর সার্ভারে লেখা (নিজেকে নিজে কিক এড়াতে)
   const ref=base().collection('users').doc(user.uid),now=new Date().toISOString();
   await db.runTransaction(async tx=>{
     const d=await tx.get(ref);
-    if(d.exists)tx.update(ref,{activeSession:sid,sessionAt:now});
-    else tx.set(ref,{email:user.email,balance:0,supportPin:String(Math.floor(1000+Math.random()*9000)),isBlocked:false,createdAt:now,activeSession:sid,sessionAt:now});
+    if(d.exists)tx.update(ref,{...profileUpdate(user),activeSession:sid,sessionAt:now});
+    else tx.set(ref,{...profileFields(user),balance:0,supportPin:String(Math.floor(1000+Math.random()*9000)),isBlocked:false,createdAt:now,activeSession:sid,sessionAt:now});
   });
 }
 auth.onAuthStateChanged(async user=>{
@@ -219,7 +244,7 @@ auth.onAuthStateChanged(async user=>{
     currentUser=user;
     $('authNavBtn').innerHTML='<i class="fa-solid fa-user-check text-xs text-primary"></i>';
     $('authActionButton').innerText='Logout';
-    $('accountEmail').innerText=user.email;$('accountUid').innerText=user.uid;$('accountInitial').innerText=user.email.charAt(0).toUpperCase();
+    const ident=user.email||user.phoneNumber||'User';$('accountEmail').innerText=ident;$('accountUid').innerText=user.uid;$('accountInitial').innerText=(user.email||user.displayName||'#').charAt(0).toUpperCase();
     if(justLoggedIn){justLoggedIn=false;try{await claimSession(user)}catch(e){setSid(user.uid,null);showToast("Session error: "+e.message,"error")}}
     if(auth.currentUser!==user)return;
     const ref=base().collection('users').doc(user.uid);
@@ -232,7 +257,7 @@ auth.onAuthStateChanged(async user=>{
         if(!mine&&!claiming){claiming=true;claimSession(user).catch(()=>{}).finally(()=>claiming=false)}
         if(!userData.supportPin){ref.update({supportPin:String(Math.floor(1000+Math.random()*9000))})}
       }else{
-        userData={email:user.email,balance:0,supportPin:String(Math.floor(1000+Math.random()*9000)),isBlocked:false,createdAt:new Date().toISOString()};
+        userData={...profileFields(user),balance:0,supportPin:String(Math.floor(1000+Math.random()*9000)),isBlocked:false,createdAt:new Date().toISOString()};
         ref.set(userData);
       }
       $('userBalance').innerText=Number(userData.balance||0).toFixed(2);
@@ -251,7 +276,7 @@ auth.onAuthStateChanged(async user=>{
   }
 });
 
-window.addEventListener('DOMContentLoaded',()=>{initSettingsListener();initCategoriesListener();initProductsListener();renderCategories();initRecentOrdersListener()});
+window.addEventListener('DOMContentLoaded',()=>{auth.getRedirectResult().catch(e=>{if(e&&e.code)showToast(authErrMsg(e),"error")});initSettingsListener();initCategoriesListener();initProductsListener();renderCategories();initRecentOrdersListener()});
 
 /* ============================================================
    RECENT ORDERS (LIVE) — শুধু admin Complete করা অর্ডার দেখাবে
@@ -269,6 +294,13 @@ function roDisplayName(email){
   if(name.length>10)name=name.slice(0,10);
   return name+(String(email||'').split('@')[0].length>3?'***':'');
 }
+// Google ইউজার: নামের প্রথম অংশ, ফোন ইউজার: নম্বরের মাঝের অংশ লুকানো, ইমেইল ইউজার: আগের নিয়মে
+function roOrderName(o){
+  if(o.userName){const f=String(o.userName).trim().split(/\s+/)[0].slice(0,10);if(f)return f+'***'}
+  if(o.userEmail)return roDisplayName(o.userEmail);
+  if(o.userPhone){const p=String(o.userPhone);return p.slice(0,5)+'***'+p.slice(-2)}
+  return 'User***';
+}
 function roColor(str){let h=0;for(const c of String(str||'x'))h=(h*31+c.charCodeAt(0))>>>0;return RO_COLORS[h%RO_COLORS.length]}
 
 function renderRecentOrders(orders){
@@ -278,10 +310,10 @@ function renderRecentOrders(orders){
     .sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,RO_LIMIT);
   if(!list.length){box.innerHTML='<p class="text-center text-slate-500 text-xs py-6">এখনো কোনো Completed অর্ডার নেই।</p>';return}
   box.innerHTML=list.map(o=>{
-    const name=roDisplayName(o.userEmail),isNew=!roFirstLoad&&!roSeen.has(o.id);
+    const name=roOrderName(o),isNew=!roFirstLoad&&!roSeen.has(o.id);
     return `<div class="flex items-center justify-between gap-3 py-3 ${isNew?'ro-new':''}">
       <div class="flex items-center gap-3 min-w-0">
-        <div class="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white font-semibold text-base" style="background:${roColor(o.userEmail||o.id)}">${esc(name.charAt(0).toUpperCase())}</div>
+        <div class="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white font-semibold text-base" style="background:${roColor(o.userEmail||o.id)}">${esc(/^[+\d]/.test(name)?'#':name.charAt(0).toUpperCase())}</div>
         <div class="min-w-0"><p class="text-sm font-semibold text-white truncate">${esc(name)}</p><p class="text-[11px] text-slate-400 truncate">${esc(o.productName||'')} - ${esc(o.packageName||'')}</p></div>
       </div>
       <span class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-emerald-500 bg-emerald-500/10 text-emerald-400 text-xs font-bold"><i class="fa-solid fa-circle-check"></i>Completed</span>
@@ -490,7 +522,7 @@ async function confirmPurchase(){
   try{
     const b=db.batch();
     b.update(base().collection('users').doc(currentUser.uid),{balance:firebase.firestore.FieldValue.increment(-price)});
-    b.set(base().collection('orders').doc(),{userId:currentUser.uid,userEmail:currentUser.email,productName:currentSelectedProduct.name,packageName:sel.name,price,status:'pending',licenseKey:'',createdAt:new Date().toISOString()});
+    b.set(base().collection('orders').doc(),{userId:currentUser.uid,userEmail:currentUser.email||'',userPhone:currentUser.phoneNumber||'',userName:currentUser.displayName||'',productName:currentSelectedProduct.name,packageName:sel.name,price,status:'pending',licenseKey:'',createdAt:new Date().toISOString()});
     await b.commit();
     showToast("Order placed successfully! Check 'My Orders'.","success");
     closeProductModal();switchTab('orders');
@@ -515,7 +547,7 @@ async function submitDeposit(ev){
       const t=await tx.get(trxRef);
       if(t.exists)throw new Error('TRX_USED');
       tx.set(trxRef,{userId:currentUser.uid,depositId:depRef.id,trxId:trx,createdAt:new Date().toISOString()});
-      tx.set(depRef,{userId:currentUser.uid,userEmail:currentUser.email,gateway:$('depositGateway').value,amount,sender:$('depositSender').value.trim(),trxId:trx,status:'pending',createdAt:new Date().toISOString()});
+      tx.set(depRef,{userId:currentUser.uid,userEmail:currentUser.email||'',userPhone:currentUser.phoneNumber||'',userName:currentUser.displayName||'',gateway:$('depositGateway').value,amount,sender:$('depositSender').value.trim(),trxId:trx,status:'pending',createdAt:new Date().toISOString()});
     });
     showToast("Deposit request submitted! Awaiting admin approval.","success");$('depositForm').reset();
   }catch(err){
@@ -560,7 +592,107 @@ function switchTab(tab){
   document.querySelectorAll('.nav-item').forEach(i=>{const on=i.dataset.tab===tab;i.classList.toggle('text-primary',on);i.classList.toggle('text-slate-400',!on)});
   window.scrollTo({top:0,behavior:'smooth'});
 }
-function toggleAuthModal(){const m=$('authModal');m.classList.toggle('hidden');m.classList.toggle('flex')}
+function toggleAuthModal(){const m=$('authModal');m.classList.toggle('hidden');m.classList.toggle('flex');if(m.classList.contains('hidden'))resetPhoneAuth()}
+function closeAuthModal(){const m=$('authModal');if(!m.classList.contains('hidden'))toggleAuthModal()}
+
+/* ---------- Google + Phone (OTP) লগইন ---------- */
+let authMethod='email',confirmationResult=null,recaptchaVerifier=null,otpTimer=null,phoneBusy=false,googleBusy=false;
+function authErrMsg(e){
+  const m={
+    'auth/invalid-phone-number':'ফোন নম্বর সঠিক নয়। 01XXXXXXXXX ফরম্যাটে দিন।',
+    'auth/missing-phone-number':'ফোন নম্বর দিন।',
+    'auth/too-many-requests':'অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।',
+    'auth/quota-exceeded':'SMS লিমিট শেষ। পরে চেষ্টা করুন।',
+    'auth/invalid-verification-code':'OTP ভুল হয়েছে।',
+    'auth/code-expired':'OTP এর মেয়াদ শেষ। আবার OTP নিন।',
+    'auth/captcha-check-failed':'reCAPTCHA যাচাই ব্যর্থ। পেজ রিফ্রেশ করে আবার চেষ্টা করুন।',
+    'auth/operation-not-allowed':'এই লগইন পদ্ধতি এখনো চালু করা হয়নি। অ্যাডমিনকে জানান।',
+    'auth/unauthorized-domain':'এই ডোমেইন Firebase এ অনুমোদিত নয়।',
+    'auth/network-request-failed':'ইন্টারনেট সংযোগ চেক করুন।',
+    'auth/account-exists-with-different-credential':'এই ইমেইল দিয়ে আগে অন্য পদ্ধতিতে অ্যাকাউন্ট খোলা হয়েছে।',
+    'auth/user-disabled':'এই অ্যাকাউন্ট বন্ধ করা হয়েছে।'
+  };
+  return m[e&&e.code]||(e&&e.message)||'Something went wrong';
+}
+function setAuthMethod(mth){
+  authMethod=mth;
+  $('emailAuthForm').classList.toggle('hidden',mth!=='email');
+  $('phoneAuthForm').classList.toggle('hidden',mth!=='phone');
+  [['email','tabEmail'],['phone','tabPhone']].forEach(p=>{const on=p[0]===mth,b=$(p[1]);b.classList.toggle('bg-primary',on);b.classList.toggle('text-white',on);b.classList.toggle('bg-slate-800',!on);b.classList.toggle('text-slate-300',!on)});
+  $('authModalTitle').innerText=mth==='phone'?'Login with Phone':(isRegisterMode?'Register New Account':'Login to Account');
+}
+async function signInWithGoogle(){
+  if(googleBusy)return;googleBusy=true;
+  const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
+  justLoggedIn=true;
+  try{await auth.signInWithPopup(provider);showToast("Google দিয়ে লগইন সফল!","success");closeAuthModal()}
+  catch(err){
+    // পপআপ ব্লক হলে রিডাইরেক্টে ফলব্যাক (রিডাইরেক্ট শেষে সেশন onSnapshot এ নিজে থেকেই ক্লেইম হয়)
+    if(err&&(err.code==='auth/popup-blocked'||err.code==='auth/operation-not-supported-in-this-environment')){
+      try{await auth.signInWithRedirect(provider);return}catch(e2){err=e2}
+    }
+    justLoggedIn=false;
+    if(!err||(err.code!=='auth/popup-closed-by-user'&&err.code!=='auth/cancelled-popup-request'))showToast(authErrMsg(err),"error");
+  }
+  googleBusy=false;
+}
+// 01XXXXXXXXX / 8801XXXXXXXXX / +8801XXXXXXXXX → +8801XXXXXXXXX
+function normPhoneBD(s){
+  const d=String(s||'').replace(/[\s\-()]/g,'');
+  if(/^\+8801[3-9]\d{8}$/.test(d))return d;
+  if(/^8801[3-9]\d{8}$/.test(d))return '+'+d;
+  if(/^01[3-9]\d{8}$/.test(d))return '+88'+d;
+  return null;
+}
+function startOtpCooldown(sec){
+  clearInterval(otpTimer);const b=$('resendOtpBtn');let s=sec;
+  b.disabled=true;b.innerText=`Resend (${s}s)`;
+  otpTimer=setInterval(()=>{s--;if(s<=0){clearInterval(otpTimer);b.disabled=false;b.innerText='Resend OTP'}else b.innerText=`Resend (${s}s)`},1000);
+}
+function resetPhoneAuth(){
+  clearInterval(otpTimer);confirmationResult=null;
+  if(!$('phoneStep1'))return;
+  $('phoneStep1').classList.remove('hidden');$('phoneStep2').classList.add('hidden');
+  $('authOtp').value='';$('sendOtpBtn').disabled=false;$('sendOtpBtn').innerText='Send OTP';
+  $('verifyOtpBtn').disabled=false;$('verifyOtpBtn').innerHTML='Verify &amp; Login';
+}
+async function sendPhoneOtp(){
+  if(phoneBusy)return;
+  const phone=normPhoneBD($('authPhone').value);
+  if(!phone){showToast("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)।","error");return}
+  phoneBusy=true;$('sendOtpBtn').disabled=true;$('sendOtpBtn').innerText='Sending...';
+  try{
+    if(!recaptchaVerifier)recaptchaVerifier=new firebase.auth.RecaptchaVerifier('recaptcha-container',{size:'invisible'});
+    confirmationResult=await auth.signInWithPhoneNumber(phone,recaptchaVerifier);
+    $('otpSentTo').innerText=phone;
+    $('phoneStep1').classList.add('hidden');$('phoneStep2').classList.remove('hidden');
+    $('authOtp').value='';$('authOtp').focus();
+    startOtpCooldown(60);
+    showToast("OTP পাঠানো হয়েছে। SMS চেক করুন।","success");
+  }catch(err){
+    console.error(err);
+    try{recaptchaVerifier&&recaptchaVerifier.clear()}catch(_){}
+    recaptchaVerifier=null;
+    showToast(authErrMsg(err),"error");
+  }
+  $('sendOtpBtn').disabled=false;$('sendOtpBtn').innerText='Send OTP';
+  phoneBusy=false;
+}
+async function verifyPhoneOtp(){
+  const code=$('authOtp').value.trim();
+  if(!confirmationResult){showToast("আগে OTP পাঠান।","error");return}
+  if(!/^\d{6}$/.test(code)){showToast("6 ডিজিটের OTP দিন।","error");return}
+  const b=$('verifyOtpBtn');b.disabled=true;b.innerText='Verifying...';
+  justLoggedIn=true;
+  try{
+    await confirmationResult.confirm(code);
+    showToast("ফোন নম্বর দিয়ে লগইন সফল!","success");
+    closeAuthModal();resetPhoneAuth();
+  }catch(err){
+    justLoggedIn=false;console.error(err);showToast(authErrMsg(err),"error");
+    b.disabled=false;b.innerHTML='Verify &amp; Login';
+  }
+}
 function toggleAuthMode(){
   isRegisterMode=!isRegisterMode;
   $('authModalTitle').innerText=isRegisterMode?"Register New Account":"Login to Account";
@@ -605,4 +737,4 @@ function showToast(msg,type='success'){
 }
 </script>
 </body>
-</html>
+  </html>
