@@ -3,6 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+/* অ্যাপ/WebView বা লোকাল ফাইল থেকে খুললে নিজে থেকেই লাইভ সাইটে চলে যাবে,
+   যাতে Firebase Authorized domain মিলে এবং সাইট আপডেট করলে অ্যাপেও নতুন ভার্সন আসে।
+   (নিজের কাস্টম ডোমেইন লাগালে নিচের LIVE ও OK তালিকা বদলে নিন) */
+(function(){
+  var LIVE='https://panelbuybdnetcom.github.io/PANEL-BUY-BD/';
+  var OK=['panelbuybdnetcom.github.io','localhost','127.0.0.1','panel-buy-bd.firebaseapp.com','panel-buy-bd.web.app'];
+  try{
+    if(OK.indexOf(location.hostname)===-1&&navigator.onLine!==false){
+      location.replace(LIVE+(location.search||'')+(location.hash||''));
+    }
+  }catch(e){}
+})();
+</script>
 <title>PANEL BUY BD - Ultimate Gaming Panel Store</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
