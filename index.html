@@ -273,7 +273,8 @@ function setupRecaptcha(){
 async function sendOtp(){
   const num=$('phoneInput').value.trim();
   if(!num || num.length<10){showToast("সঠিক মোবাইল নম্বর দিন।","error");return}
-  const fullNum=num.startsWith('+')?num:(num.startsWith('88')?'+'+num:'+88'+num);
+  const cleanNum = num.replace(/^0+/, '');
+  const fullNum = '+880' + cleanNum;
   const btn=$('sendOtpBtn');btn.disabled=true;btn.innerText='Sending OTP...';
   try{
     setupRecaptcha();
@@ -707,4 +708,4 @@ function showToast(msg,type='success'){
 }
 </script>
 </body>
-  </html>
+</html>
