@@ -598,6 +598,11 @@ function closeAuthModal(){const m=$('authModal');if(!m.classList.contains('hidde
 /* ---------- Google + Phone (OTP) লগইন ---------- */
 let authMethod='email',confirmationResult=null,recaptchaVerifier=null,otpTimer=null,phoneBusy=false,googleBusy=false;
 function authErrMsg(e){
+  // কোন ঠিকানা থেকে পেজ চলছে তা দেখালে Firebase এ ঠিক কোন ডোমেইন যোগ করতে হবে বোঝা যায়
+  if(e&&e.code==='auth/unauthorized-domain'){
+    const where=location.protocol==='file:'?'file:// (লোকাল ফাইল)':(location.hostname||location.origin||'অজানা');
+    return 'এই ঠিকানা Firebase এ অনুমোদিত নয়: '+where+' — Firebase → Authentication → Settings → Authorized domains এ এটি যোগ করুন (file:// হলে অ্যাপে সরাসরি সাইটের লিংক লোড করুন)।';
+  }
   // Phone চালু থাকা সত্ত্বেও operation-not-allowed এলে সাধারণত SMS region policy এ বাংলাদেশ অনুমোদিত নয়
   if(e&&e.code==='auth/operation-not-allowed'&&/region/i.test(e.message||''))return 'SMS পাঠানো যাচ্ছে না: Firebase এ Bangladesh এর SMS region অনুমোদিত নয়। Authentication → Settings → SMS region policy তে Bangladesh যোগ করুন।';
   const m={
@@ -740,4 +745,4 @@ function showToast(msg,type='success'){
 }
 </script>
 </body>
-</html>
+  </html>
