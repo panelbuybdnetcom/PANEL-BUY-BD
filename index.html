@@ -160,7 +160,7 @@ body{font-family:'Inter',sans-serif}
       <div id="phoneStep1" class="space-y-3">
         <div><label class="lbl">Mobile Number</label>
           <div class="flex items-center gap-2"><span class="px-3 py-2 rounded-xl bg-slate-900 border border-borderCol text-xs font-bold text-slate-300">+88</span><input type="tel" id="authPhone" inputmode="numeric" maxlength="14" class="inp" placeholder="01XXXXXXXXX"></div>
-          <p class="text-[10px] text-slate-500 mt-1">নম্বরে একটি 6 ডিজিটের OTP SMS যাবে। নতুন নম্বর হলে অ্যাকাউন্ট নিজে থেকেই তৈরি হবে।</p></div>
+          <p class="text-[10px] text-slate-500 mt-1">নম্বরে একটি 6 ডিজিটের OTP SMS যাবে। নতুন নম্বর হলে OTP দেওয়ার সাথে সাথেই রেজিস্ট্রেশন হয়ে যাবে, আলাদা Register বাটন লাগবে না। আগের নম্বর হলে সরাসরি লগইন হবে।</p></div>
         <button type="button" id="sendOtpBtn" onclick="sendPhoneOtp()" class="w-full py-2.5 bg-primary rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 disabled:opacity-60">Send OTP</button>
       </div>
       <div id="phoneStep2" class="space-y-3 hidden">
@@ -619,13 +619,13 @@ function setAuthMethod(mth){
   $('emailAuthForm').classList.toggle('hidden',mth!=='email');
   $('phoneAuthForm').classList.toggle('hidden',mth!=='phone');
   [['email','tabEmail'],['phone','tabPhone']].forEach(p=>{const on=p[0]===mth,b=$(p[1]);b.classList.toggle('bg-primary',on);b.classList.toggle('text-white',on);b.classList.toggle('bg-slate-800',!on);b.classList.toggle('text-slate-300',!on)});
-  $('authModalTitle').innerText=mth==='phone'?'Login with Phone':(isRegisterMode?'Register New Account':'Login to Account');
+  $('authModalTitle').innerText=mth==='phone'?'Login / Register with Phone':(isRegisterMode?'Register New Account':'Login to Account');
 }
 async function signInWithGoogle(){
   if(googleBusy)return;googleBusy=true;
   const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
   justLoggedIn=true;
-  try{await auth.signInWithPopup(provider);showToast("Google দিয়ে লগইন সফল!","success");closeAuthModal()}
+  try{const cred=await auth.signInWithPopup(provider);const isNew=!!(cred&&cred.additionalUserInfo&&cred.additionalUserInfo.isNewUser);showToast(isNew?"Google দিয়ে রেজিস্ট্রেশন সফল!":"Google দিয়ে লগইন সফল!","success");closeAuthModal()}
   catch(err){
     // পপআপ ব্লক হলে রিডাইরেক্টে ফলব্যাক (রিডাইরেক্ট শেষে সেশন onSnapshot এ নিজে থেকেই ক্লেইম হয়)
     if(err&&(err.code==='auth/popup-blocked'||err.code==='auth/operation-not-supported-in-this-environment')){
@@ -685,8 +685,9 @@ async function verifyPhoneOtp(){
   const b=$('verifyOtpBtn');b.disabled=true;b.innerText='Verifying...';
   justLoggedIn=true;
   try{
-    await confirmationResult.confirm(code);
-    showToast("ফোন নম্বর দিয়ে লগইন সফল!","success");
+    const cred=await confirmationResult.confirm(code);
+    const isNew=!!(cred&&cred.additionalUserInfo&&cred.additionalUserInfo.isNewUser);
+    showToast(isNew?"রেজিস্ট্রেশন সফল! নতুন অ্যাকাউন্ট তৈরি হয়েছে।":"ফোন নম্বর দিয়ে লগইন সফল!","success");
     closeAuthModal();resetPhoneAuth();
   }catch(err){
     justLoggedIn=false;console.error(err);showToast(authErrMsg(err),"error");
