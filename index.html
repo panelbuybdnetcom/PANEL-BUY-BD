@@ -93,10 +93,13 @@ body{font-family:'Inter',sans-serif}
       </form>
     </div>
     <div class="space-y-3"><h4 class="text-xs font-bold text-slate-300 tracking-wider uppercase">My Deposit Logs</h4><div id="userDepositHistory" class="space-y-2"></div></div>
+    <div class="space-y-3"><h4 class="text-xs font-bold text-slate-300 tracking-wider uppercase">Wallet History</h4><div id="userLedgerList" class="space-y-2"><p class="text-center text-slate-500 text-xs py-4">Please login to see this.</p></div></div>
   </div>
 
   <div id="view-orders" class="space-y-4 hidden">
     <h3 class="text-sm font-bold text-white">Order &amp; License History</h3>
+    <input type="text" id="orderSearchInput" oninput="orderQuery=this.value;renderUserOrders()" placeholder="প্যানেল বা প্যাকেজের নাম দিয়ে খুঁজুন..." class="inp">
+    <div id="orderFilterChips" class="flex gap-2 overflow-x-auto no-scrollbar"></div>
     <div id="userOrdersList" class="space-y-3"></div>
   </div>
 
@@ -199,7 +202,7 @@ const base=()=>db.collection('artifacts').doc(appId).collection('public').doc('d
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-let currentUser=null,userData={balance:0},allProducts=[],allCategories=[],selectedCategoryFilter='ALL',currentSelectedProduct=null,selectedPackageIndex=0,isRegisterMode=false,appSettings={},bannerTimer=null,currentSlide=0,purchasing=false,unsubUser=null,unsubOrders=null,unsubDeposits=null,toastTimer=null;
+let currentUser=null,userData={balance:0},allProducts=[],allCategories=[],selectedCategoryFilter='ALL',currentSelectedProduct=null,selectedPackageIndex=0,isRegisterMode=false,appSettings={},bannerTimer=null,currentSlide=0,purchasing=false,unsubUser=null,unsubOrders=null,unsubDeposits=null,unsubLedger=null,toastTimer=null;
 
 /* ---- এক সময়ে একটাই ডিভাইসে লগইন (Single Session) ---- */
 let justLoggedIn=false,claiming=false;const memSid={};
@@ -220,7 +223,7 @@ async function claimSession(user){
   });
 }
 auth.onAuthStateChanged(async user=>{
-  [unsubUser,unsubOrders,unsubDeposits].forEach(f=>f&&f());unsubUser=unsubOrders=unsubDeposits=null;
+  [unsubUser,unsubOrders,unsubDeposits,unsubLedger].forEach(f=>f&&f());unsubUser=unsubOrders=unsubDeposits=unsubLedger=null;
   if(user&&!user.isAnonymous){
     currentUser=user;
     $('authNavBtn').innerHTML='<i class="fa-solid fa-user-check text-xs text-primary"></i>';
@@ -245,7 +248,7 @@ auth.onAuthStateChanged(async user=>{
       $('accountBalance').innerText=Number(userData.balance||0).toFixed(2);
       $('accountSupportPin').innerText=userData.supportPin||'----';
     },e=>console.error("User stream error:",e));
-    loadUserOrdersAndStats();loadUserDeposits();
+    loadUserOrdersAndStats();loadUserDeposits();loadUserLedger();
   }else{
     currentUser=null;userData={balance:0};
     $('authNavBtn').innerHTML='<i class="fa-solid fa-user text-xs"></i>';
@@ -253,7 +256,7 @@ auth.onAuthStateChanged(async user=>{
     $('accountEmail').innerText='guest@panelbuybd.com';$('accountUid').innerText='Not logged in';$('accountInitial').innerText='G';
     ['userBalance','accountBalance','accountTotalSpent'].forEach(i=>$(i).innerText='0.00');
     $('accountTotalOrders').innerText='0';$('accountSupportPin').innerText='----';
-    $('userOrdersList').innerHTML=$('userKeysList').innerHTML=$('userDepositHistory').innerHTML='<p class="text-center text-slate-500 text-xs py-6">Please login to see this.</p>';
+    $('userOrdersList').innerHTML=$('userKeysList').innerHTML=$('userDepositHistory').innerHTML=$('userLedgerList').innerHTML='<p class="text-center text-slate-500 text-xs py-6">Please login to see this.</p>';
   }
 });
 
@@ -265,36 +268,20 @@ window.addEventListener('DOMContentLoaded',()=>{auth.getRedirectResult().catch(e
    ============================================================ */
 const RO_LIMIT=10;
 const RO_COLORS=['#6d28d9','#7c3aed','#f59e0b','#ef4444','#b45309','#10b981','#3b82f6','#0ea5e9','#ec4899','#14b8a6'];
-let unsubRecent=null,roFallbackTried=false,roSeen=new Set(),roFirstLoad=true;
+let unsubRecent=null,roSeen=new Set(),roFirstLoad=true;
 
-// ইউজারের নাম: ইমেইলের @ এর আগের অংশ, প্রাইভেসির জন্য শেষের দিক আংশিক লুকানো
-function roDisplayName(email){
-  const local=String(email||'').split('@')[0].replace(/[._\-+0-9]+/g,' ').trim()||String(email||'User').split('@')[0]||'User';
-  const parts=local.split(/\s+/).filter(Boolean).map(w=>w.charAt(0).toUpperCase()+w.slice(1));
-  let name=parts.join(' ')||'User';
-  if(name.length>10)name=name.slice(0,10);
-  return name+(String(email||'').split('@')[0].length>3?'***':'');
-}
-// Google ইউজার: নামের প্রথম অংশ, ফোন ইউজার: নম্বরের মাঝের অংশ লুকানো, ইমেইল ইউজার: আগের নিয়মে
-function roOrderName(o){
-  if(o.userName){const f=String(o.userName).trim().split(/\s+/)[0].slice(0,10);if(f)return f+'***'}
-  if(o.userEmail)return roDisplayName(o.userEmail);
-  if(o.userPhone){const p=String(o.userPhone);return p.slice(0,5)+'***'+p.slice(-2)}
-  return 'User***';
-}
 function roColor(str){let h=0;for(const c of String(str||'x'))h=(h*31+c.charCodeAt(0))>>>0;return RO_COLORS[h%RO_COLORS.length]}
 
+// publicOrders: admin Complete করলে নিজে থেকে তৈরি হয় — এখানে License Key বা ইমেইল/ফোন থাকে না, শুধু মাস্ক করা নাম
 function renderRecentOrders(orders){
   const box=$('recentOrdersList');
-  // নিরাপত্তা: ক্লায়েন্ট সাইডেও আবার ফিল্টার — শুধু completed
-  const list=orders.filter(o=>String(o.status).toLowerCase()==='completed')
-    .sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,RO_LIMIT);
+  const list=orders.sort((a,b)=>new Date(b.completedAt||b.createdAt||0)-new Date(a.completedAt||a.createdAt||0)).slice(0,RO_LIMIT);
   if(!list.length){box.innerHTML='<p class="text-center text-slate-500 text-xs py-6">এখনো কোনো Completed অর্ডার নেই।</p>';return}
   box.innerHTML=list.map(o=>{
-    const name=roOrderName(o),isNew=!roFirstLoad&&!roSeen.has(o.id);
+    const name=o.name||'User***',isNew=!roFirstLoad&&!roSeen.has(o.id);
     return `<div class="flex items-center justify-between gap-3 py-3 ${isNew?'ro-new':''}">
       <div class="flex items-center gap-3 min-w-0">
-        <div class="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white font-semibold text-base" style="background:${roColor(o.userEmail||o.id)}">${esc(/^[+\d]/.test(name)?'#':name.charAt(0).toUpperCase())}</div>
+        <div class="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white font-semibold text-base" style="background:${roColor(name)}">${esc(/^[+\d]/.test(name)?'#':name.charAt(0).toUpperCase())}</div>
         <div class="min-w-0"><p class="text-sm font-semibold text-white truncate">${esc(name)}</p><p class="text-[11px] text-slate-400 truncate">${esc(o.productName||'')} - ${esc(o.packageName||'')}</p></div>
       </div>
       <span class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-emerald-500 bg-emerald-500/10 text-emerald-400 text-xs font-bold"><i class="fa-solid fa-circle-check"></i>Completed</span>
@@ -305,16 +292,10 @@ function renderRecentOrders(orders){
 
 function initRecentOrdersListener(){
   if(unsubRecent)unsubRecent();
-  // প্রাথমিক কোয়েরি: status=completed + নতুন আগে (Firestore composite index লাগবে)
-  const q=roFallbackTried
-    ? base().collection('orders').where('status','==','completed').limit(60)
-    : base().collection('orders').where('status','==','completed').orderBy('createdAt','desc').limit(RO_LIMIT);
-  unsubRecent=q.onSnapshot(s=>{
+  unsubRecent=base().collection('publicOrders').orderBy('completedAt','desc').limit(RO_LIMIT).onSnapshot(s=>{
     renderRecentOrders(s.docs.map(d=>({id:d.id,...d.data()})));
   },e=>{
     console.log("Recent orders err:",e);
-    // index না থাকলে সহজ কোয়েরিতে ফলব্যাক
-    if(!roFallbackTried&&(e.code==='failed-precondition')){roFallbackTried=true;initRecentOrdersListener();return}
     $('recentOrdersList').innerHTML='<p class="text-center text-slate-500 text-xs py-6">Recent orders লোড করা যায়নি।</p>';
   });
 }
@@ -504,6 +485,7 @@ async function confirmPurchase(){
     const b=db.batch();
     b.update(base().collection('users').doc(currentUser.uid),{balance:firebase.firestore.FieldValue.increment(-price)});
     b.set(base().collection('orders').doc(),{userId:currentUser.uid,userEmail:currentUser.email||'',userPhone:currentUser.phoneNumber||'',userName:currentUser.displayName||'',productName:currentSelectedProduct.name,packageName:sel.name,price,status:'pending',licenseKey:'',createdAt:new Date().toISOString()});
+    b.set(base().collection('ledger').doc(),{userId:currentUser.uid,type:'purchase',amount:-price,note:currentSelectedProduct.name+' - '+sel.name,createdAt:new Date().toISOString()});
     await b.commit();
     showToast("Order placed successfully! Check 'My Orders'.","success");
     closeProductModal();switchTab('orders');
@@ -538,6 +520,20 @@ async function submitDeposit(ev){
   depositBusy=false;btn.disabled=false;btn.innerText='Submit Deposit Request';
 }
 
+
+let userOrdersCache=[],orderFilter='all',orderQuery='';
+function renderUserOrders(){
+  const orders=userOrdersCache,badge={pending:'bg-amber-500/20 text-amber-400 border-amber-500/30',completed:'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',rejected:'bg-rose-500/20 text-rose-400 border-rose-500/30'};
+  const cnt={all:orders.length,pending:0,completed:0,rejected:0};orders.forEach(o=>{if(cnt[o.status]!==undefined)cnt[o.status]++});
+  const chip=(k,l)=>`<button type="button" data-of="${k}" class="of-chip shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition ${orderFilter===k?'bg-primary text-white border-primary':'bg-cardBg text-slate-300 border-borderCol'}">${l} (${cnt[k]})</button>`;
+  $('orderFilterChips').innerHTML=chip('all','সব')+chip('pending','Pending')+chip('completed','Completed')+chip('rejected','Rejected');
+  const q=orderQuery.trim().toLowerCase();
+  const list=orders.filter(o=>(orderFilter==='all'||o.status===orderFilter)&&(!q||(String(o.productName||'')+' '+String(o.packageName||'')).toLowerCase().includes(q)));
+  if(!orders.length){$('userOrdersList').innerHTML='<p class="text-center text-slate-500 text-xs py-6">No orders placed yet.</p>';return}
+  if(!list.length){$('userOrdersList').innerHTML='<p class="text-center text-slate-500 text-xs py-6">কোনো অর্ডার পাওয়া যায়নি।</p>';return}
+  $('userOrdersList').innerHTML=list.map(o=>`<div class="bg-cardBg border border-borderCol rounded-xl p-3.5 space-y-2"><div class="flex items-center justify-between"><h5 class="text-xs font-bold text-white">${esc(o.productName)}</h5><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badge[o.status]||badge.pending}">${esc(o.status)}</span></div><div class="flex items-center justify-between text-[11px] text-slate-400"><span>Package: <b class="text-slate-200">${esc(o.packageName)}</b></span><span class="text-primary font-bold">৳ ${o.price}</span></div>${o.licenseKey?`<div class="bg-slate-900 border border-slate-800 p-2 rounded-lg flex items-center justify-between"><code class="text-xs font-mono text-emerald-400 break-all">${esc(o.licenseKey)}</code><button data-key="${esc(o.licenseKey)}" class="copy-btn text-xs text-slate-400 hover:text-white pl-2"><i class="fa-solid fa-copy"></i></button></div>`:''}</div>`).join('');
+}
+document.addEventListener('click',e=>{const c=e.target.closest('.of-chip');if(c){orderFilter=c.dataset.of;renderUserOrders()}});
 function loadUserOrdersAndStats(){
   if(!currentUser)return;if(unsubOrders)unsubOrders();
   unsubOrders=base().collection('orders').where('userId','==',currentUser.uid).onSnapshot(s=>{
@@ -545,8 +541,7 @@ function loadUserOrdersAndStats(){
     $('accountTotalOrders').innerText=orders.length;
     $('accountTotalSpent').innerText=orders.filter(o=>o.status==='completed').reduce((a,o)=>a+Number(o.price||0),0).toFixed(2);
     if(!orders.length){$('userOrdersList').innerHTML='<p class="text-center text-slate-500 text-xs py-6">No orders placed yet.</p>';$('userKeysList').innerHTML='<p class="text-center text-slate-500 text-xs py-6">No license keys delivered yet.</p>';return}
-    const badge={pending:'bg-amber-500/20 text-amber-400 border-amber-500/30',completed:'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',rejected:'bg-rose-500/20 text-rose-400 border-rose-500/30'};
-    $('userOrdersList').innerHTML=orders.map(o=>`<div class="bg-cardBg border border-borderCol rounded-xl p-3.5 space-y-2"><div class="flex items-center justify-between"><h5 class="text-xs font-bold text-white">${esc(o.productName)}</h5><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badge[o.status]||badge.pending}">${esc(o.status)}</span></div><div class="flex items-center justify-between text-[11px] text-slate-400"><span>Package: <b class="text-slate-200">${esc(o.packageName)}</b></span><span class="text-primary font-bold">৳ ${o.price}</span></div>${o.licenseKey?`<div class="bg-slate-900 border border-slate-800 p-2 rounded-lg flex items-center justify-between"><code class="text-xs font-mono text-emerald-400 break-all">${esc(o.licenseKey)}</code><button data-key="${esc(o.licenseKey)}" class="copy-btn text-xs text-slate-400 hover:text-white pl-2"><i class="fa-solid fa-copy"></i></button></div>`:''}</div>`).join('');
+    userOrdersCache=orders;renderUserOrders();
     const keys=orders.filter(o=>o.status==='completed'&&o.licenseKey);
     $('userKeysList').innerHTML=keys.map(o=>`<div class="bg-cardBg border border-borderCol rounded-xl p-3.5 space-y-2"><div class="flex items-center justify-between"><h5 class="text-xs font-bold text-white">${esc(o.productName)} (${esc(o.packageName)})</h5><span class="text-[10px] text-slate-400">${new Date(o.createdAt).toLocaleDateString()}</span></div><div class="bg-slate-900 border border-slate-800 p-2.5 rounded-lg flex items-center justify-between"><code class="text-xs font-mono text-emerald-400 font-bold break-all">${esc(o.licenseKey)}</code><button data-key="${esc(o.licenseKey)}" class="copy-btn ml-2 px-2.5 py-1 bg-primary/20 text-primary text-xs rounded-lg hover:bg-primary hover:text-white transition"><i class="fa-solid fa-copy"></i> Copy</button></div><button type="button" data-pid="${esc(o.productName)}" data-byname="1" class="files-btn w-full py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl text-[11px] font-bold text-white flex items-center justify-center gap-1.5"><i class="fa-solid fa-download"></i> DOWNLOAD &amp; SETUP</button></div>`).join('')||'<p class="text-center text-slate-500 text-xs py-6">No license keys available yet.</p>';
   },e=>console.log("Orders err:",e));
@@ -559,6 +554,20 @@ function loadUserDeposits(){
     const col={pending:'text-amber-400 bg-amber-500/20 border-amber-500/30',approved:'text-emerald-400 bg-emerald-500/20 border-emerald-500/30',rejected:'text-rose-400 bg-rose-500/20 border-rose-500/30'};
     $('userDepositHistory').innerHTML=dep.map(d=>`<div class="bg-cardBg border border-borderCol rounded-xl p-3 flex items-center justify-between"><div><div class="flex items-center space-x-2"><span class="text-xs font-bold text-white">${esc(d.gateway)}</span><span class="px-2 py-0.5 rounded text-[9px] font-bold border ${col[d.status]||col.pending}">${esc(String(d.status).toUpperCase())}</span></div><p class="text-[10px] text-slate-400 mt-0.5">TrxID: <b class="text-slate-300 font-mono">${esc(d.trxId)}</b></p></div><div class="text-right"><span class="text-xs font-extrabold text-primary">৳ ${d.amount}</span><p class="text-[9px] text-slate-500">${new Date(d.createdAt).toLocaleDateString()}</p></div></div>`).join('');
   },e=>console.log("Deposits err:",e));
+}
+
+/* ---------- Wallet History (ওয়ালেটের প্রতিটি লেনদেন) ---------- */
+const LEDGER_TYPES={deposit:['ডিপোজিট','fa-arrow-down','text-emerald-400'],purchase:['প্যানেল কেনা','fa-cart-shopping','text-rose-400'],refund:['রিফান্ড','fa-rotate-left','text-sky-400'],recharge:['পুনরায় কাটা','fa-rotate-right','text-amber-400'],admin_adjust:['অ্যাডমিন সমন্বয়','fa-user-shield','text-violet-400']};
+function loadUserLedger(){
+  if(!currentUser)return;if(unsubLedger)unsubLedger();
+  unsubLedger=base().collection('ledger').where('userId','==',currentUser.uid).onSnapshot(s=>{
+    const rows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,50);
+    if(!rows.length){$('userLedgerList').innerHTML='<p class="text-center text-slate-500 text-xs py-4">এখনো কোনো লেনদেন নেই।</p>';return}
+    $('userLedgerList').innerHTML=rows.map(r=>{
+      const t=LEDGER_TYPES[r.type]||[r.type||'লেনদেন','fa-circle','text-slate-300'],amt=Number(r.amount||0),plus=amt>=0;
+      return `<div class="bg-cardBg border border-borderCol rounded-xl p-3 flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><div class="w-8 h-8 shrink-0 rounded-full bg-slate-800 flex items-center justify-center ${t[2]} text-xs"><i class="fa-solid ${t[1]}"></i></div><div class="min-w-0"><p class="text-xs font-bold text-white truncate">${esc(t[0])}</p><p class="text-[10px] text-slate-400 truncate">${esc(r.note||'')}</p></div></div><div class="text-right shrink-0"><p class="text-xs font-extrabold ${plus?'text-emerald-400':'text-rose-400'}">${plus?'+':'-'}৳ ${Math.abs(amt)}</p><p class="text-[9px] text-slate-500">${new Date(r.createdAt).toLocaleDateString()}</p></div></div>`;
+    }).join('');
+  },e=>console.log("Ledger err:",e));
 }
 document.addEventListener('click',e=>{const b=e.target.closest('.copy-btn');if(b)copyKey(b.dataset.key);const f=e.target.closest('.files-btn');if(f)openFileModal(f.dataset.pid,f.dataset.byname==='1')});
 function copyKey(key){
@@ -671,4 +680,4 @@ function showToast(msg,type='success'){
 }
 </script>
 </body>
-</html>
+  </html>
