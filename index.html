@@ -611,11 +611,14 @@ function authErrMsg(e){
   };
   return m[e&&e.code]||(e&&e.message)||'Something went wrong';
 }
+const IN_APP=(function(){try{if(/[?&]app=1/.test(location.search))localStorage.setItem('inApp','1');return localStorage.getItem('inApp')==='1'}catch(e){return /[?&]app=1/.test(location.search)}})();
 function isEmbeddedWebView(){
+  if(IN_APP)return true;
   const ua=navigator.userAgent||'';
   return /; wv\)/.test(ua)||(/Android/.test(ua)&&/Version\/\d/.test(ua)&&/Chrome\//.test(ua))||/FBAN|FBAV|Instagram/.test(ua);
 }
 async function signInWithGoogle(){
+  if(isEmbeddedWebView()){showToast("অ্যাপের ভেতরে Google লগইন কাজ করে না। Email দিয়ে লগইন করুন, অথবা Chrome ব্রাউজারে সাইটটি খুলে Google দিয়ে লগইন করুন।","error");return}
   if(googleBusy)return;googleBusy=true;
   const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
   justLoggedIn=true;
